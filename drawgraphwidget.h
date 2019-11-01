@@ -35,6 +35,9 @@ public:
     void calculateEdgeMoveVertex(std::shared_ptr<Edge> edge);
     //bool calculateEdgeMoveVertex(std::shared_ptr<Edge> edge, std::shared_ptr<Vertex> moveVertex, QPoint mousePosition);
     void coordsMouseLoop(std::shared_ptr<Edge> edge);
+    std::shared_ptr<GraphData> getGraphData();
+
+    bool needEdge = false;
 
 protected:
     void paintEvent(QPaintEvent *event);
@@ -54,8 +57,6 @@ private:
     std::shared_ptr<Edge> selectedEdge;
 
     std::shared_ptr<Vertex> newSelectedVertex;
-
-    bool needEdge = false;
 
     QPoint mouseCoord;
 

@@ -350,7 +350,7 @@ void DrawGraphWidget::mouseReleaseEvent(QMouseEvent *event)
             if(closestVert)
             {
                 graphData->setEdge(std::make_shared<Edge>(selectedVertex->index, closestVert->index, 1));
-                needEdge = false;
+                //needEdge = false;
                 needRepaint = true;
             }
 
@@ -526,6 +526,11 @@ void DrawGraphWidget::coordsMouseLoop(std::shared_ptr<Edge> edge)
     double Y = x1 * std::sin(angle) + y1 * std::cos(angle);
 
     calculateEdge(edge, QPoint(X, Y));
+}
+
+std::shared_ptr<GraphData> DrawGraphWidget::getGraphData()
+{
+    return graphData;
 }
 
 

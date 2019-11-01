@@ -13,6 +13,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     initGraph();
 
+    ui->edgeButtonTask->setStyleSheet("background-color: white");
+    ui->vertexButtonTask->setStyleSheet("background-color: grey");
+    ui->toolButton->setStyleSheet("background-color: white");
+
+    ui->tabWidget->removeTab(1);
 }
 
 MainWindow::~MainWindow()
@@ -40,8 +45,10 @@ void MainWindow::initGraph()
     graph->setEdge(std::make_shared<Edge>(2, 3, 3));
     graph->setEdge(std::make_shared<Edge>(3, 4, 3));
 
-    ui->widget->setGraphData(graph);
-    ui->widget->update();
+    //ui->widget->update();
+    ui->tab_1->setGraphData(graph);
+    //ui->tabWidget->setUpdatesEnabled(false);
+    ui->tabWidget->setTabsClosable(true);
 }
 
 
@@ -82,8 +89,8 @@ void MainWindow::on_openFileBut_clicked()
             }
             parseMatrix(list);
         }
-        ui->widget->update();
-        ui->widget->setFocus();
+        //ui->tabWidget->update();
+        //ui->wi->setFocus();
         file.close();
     }
 }
@@ -120,4 +127,45 @@ void MainWindow::parseEdgeFile(QString edgeS)
 void MainWindow::parseMatrix(QList<QString> list)
 {
 
+}
+
+void MainWindow::on_tabWidget_currentChanged(int index)
+{
+
+}
+
+void MainWindow::on_toolButton_clicked()
+{
+    DrawGraphWidget *w = (DrawGraphWidget *)ui->tabWidget->currentWidget();
+    w->needEdge = false;
+
+    std::shared_ptr<GraphData> g = std::make_shared<GraphData>();
+    DrawGraphWidget *widget = new DrawGraphWidget();
+    widget->setGraphData(g);
+
+    ui->tabWidget->addTab(widget, QString::number(ui->tabWidget->count()));
+
+    ui->edgeButtonTask->setStyleSheet("background-color: white");
+    ui->vertexButtonTask->setStyleSheet("background-color: white");
+    ui->toolButton->setStyleSheet("background-color: grey");
+}
+
+void MainWindow::on_edgeButtonTask_clicked()
+{
+    DrawGraphWidget *w = (DrawGraphWidget *)ui->tabWidget->currentWidget();
+    w->needEdge = true;
+    ui->edgeButtonTask->setStyleSheet("background-color: grey");
+    ui->vertexButtonTask->setStyleSheet("background-color: white");
+    ui->toolButton->setStyleSheet("background-color: white");
+
+}
+
+void MainWindow::on_vertexButtonTask_clicked()
+{
+    DrawGraphWidget *w = (DrawGraphWidget *)ui->tabWidget->currentWidget();
+    w->needEdge = false;
+
+    ui->edgeButtonTask->setStyleSheet("background-color: white");
+    ui->vertexButtonTask->setStyleSheet("background-color: grey");
+    ui->toolButton->setStyleSheet("background-color: white");
 }
