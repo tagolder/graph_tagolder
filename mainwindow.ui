@@ -25,6 +25,23 @@
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
+      <widget class="QTabWidget" name="tabWidget">
+       <property name="currentIndex">
+        <number>1</number>
+       </property>
+       <widget class="DrawGraphWidget" name="tab_1">
+        <attribute name="title">
+         <string>граф 1</string>
+        </attribute>
+       </widget>
+       <widget class="DrawGraphWidget" name="tab_2">
+        <attribute name="title">
+         <string>+</string>
+        </attribute>
+       </widget>
+      </widget>
+     </item>
+     <item>
       <widget class="DrawGraphWidget" name="widget" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">

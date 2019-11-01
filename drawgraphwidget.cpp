@@ -165,24 +165,7 @@ void DrawGraphWidget::paintEvent(QPaintEvent *event)
                         painter->drawText(rect, QString::number(closesEdge->weight));
                     }
 
-                    for (int i = 0; i < N; i++)
-                    {
-                        std::shared_ptr<Vertex> vert = vertexes.at(i);
-                        if (!vert)
-                        {
-                            continue;
-                        }
 
-                        const double X = vert->coordX;
-                        const double Y = vert->coordY;
-
-                        const QColor &color = vert->color;
-                        const double diam = vert->drawDiam;
-
-                        painter->setBrush(QBrush(color));
-
-                        painter->drawEllipse(QPointF(X, Y), diam / 2.0, diam / 2.0);
-                    }
                 }
 
                 // Если веса одинаковые то ребро ненаправленное
@@ -200,6 +183,26 @@ void DrawGraphWidget::paintEvent(QPaintEvent *event)
 //                }
             }
         }
+
+        for (int i = 0; i < N; i++)
+        {
+            std::shared_ptr<Vertex> vert = vertexes.at(i);
+            if (!vert)
+            {
+                continue;
+            }
+
+            const double X = vert->coordX;
+            const double Y = vert->coordY;
+
+            const QColor &color = vert->color;
+            const double diam = vert->drawDiam;
+
+            painter->setBrush(QBrush(color));
+
+            painter->drawEllipse(QPointF(X, Y), diam / 2.0, diam / 2.0);
+        }
+
         if(needEdge)
         {
             if(selectedVertex)
@@ -337,8 +340,8 @@ void DrawGraphWidget::mouseReleaseEvent(QMouseEvent *event)
     {
         if(needEdge)
         {
-            const double X = event->pos().x();
-            const double Y = event->pos().y();
+            const double X = event->pos().rx();
+            const double Y = event->pos().ry();
 
             const int dist = 15;
 
@@ -358,7 +361,6 @@ void DrawGraphWidget::mouseReleaseEvent(QMouseEvent *event)
             newSelectedVertex->color = Qt::green;
         }
         selectedVertex->color = Qt::green;
-        //selectedVertex = std::shared_ptr<Vertex>();
 
         needRepaint = true;
     }

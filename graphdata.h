@@ -89,8 +89,8 @@ public:
 
         if (!isDir)
         {
-            edges[i][j].push_back(edge);
-            edges[j][i].push_back(edge);
+            edges.at(i).at(j).push_back(edge);
+            edges.at(j).at(i).push_back(edge);
         }
         else
         {
@@ -251,16 +251,32 @@ public:
         }
 
         vertexes.erase(vertexes.begin() + index);
-        for (int i = 0; i < edges.size(); i++)
+
+        for (auto it_col= edges.begin(); it_col != edges.end(); it_col++)
         {
-            for(int j = 0; j < edges.size(); j++)
+            (*it_col).erase((*it_col).begin() +index);
+         }
+
+        edges.erase(edges.begin() + index);
+
+        for(int i = index; i < vertexes.size(); i++)
+        {
+            vertexes[i]->index = i;
+        }
+
+        for(int i = 0; i < edges.size(); i++)
+        {
+            for(int j = 0; j < edges[i].size(); j++)
             {
-                if(i == index || j == index)
+                for(auto edge : edges[i][j])
                 {
-                    edges[i][j].clear();
+                    edge->v1Index = i;
+                    edge->v2Index = j;
                 }
             }
         }
+        qDebug() << vertexes.size();
+
     }
 
 private:
