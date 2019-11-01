@@ -39,6 +39,7 @@ struct Edge
     bool isNormal = true;
     bool nad = true;
     bool isLoop = false;
+    QColor color = Qt::black;
     QPoint mousePosition = QPoint(0,0);
     QPoint coords1 = QPoint(0,0);
     QPoint coords2 = QPoint(0,0);

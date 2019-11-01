@@ -1,6 +1,7 @@
 #-------------------------------------------------
 #
 # Project created by QtCreator 2019-09-06T20:23:02
+# Author : tagolder
 #
 #-------------------------------------------------
 
@@ -26,21 +27,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-#    graph.cpp \
-#    edge.cpp \
-#    node.cpp \
-    graphdata.cpp \
-    drawgraphwidget.cpp
+        graphdata.cpp \
+        drawgraphwidget.cpp
 
 HEADERS += \
         mainwindow.h \
-#    graph.h \
-#    edge.h \
-#    node.h \
-    graphdata.h \
-    drawgraphwidget.h
+        graphdata.h \
+        drawgraphwidget.h
 
 
 FORMS += \
         mainwindow.ui \
-    drawgraphwidget.ui
+        drawgraphwidget.ui
