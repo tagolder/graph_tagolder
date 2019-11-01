@@ -1,0 +1,1 @@
+Vertex{name12(0,100)} Vertex{name13(150,200)} Edge{1(12,name5,name12)} Vertex{name14(230,100)} Edge{2(23,name4,name5)}
