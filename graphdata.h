@@ -21,7 +21,7 @@ struct Vertex
     std::string name = "";
     uint index = 0;
     QColor color = Qt::green;
-    double drawDiam = 20.0;
+    double drawDiam = 30.0;
 };
 
 struct Edge
@@ -46,7 +46,7 @@ struct Edge
     QPoint heightWidth1 = QPoint(0,0);
     QPoint heightWidth2 = QPoint(0,0);
     double a1_a = 0;
-    int angle;
+    double angle;
 
 };
 

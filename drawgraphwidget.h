@@ -1,6 +1,9 @@
 #ifndef DRAWGRAPHWIDGET_H
 #define DRAWGRAPHWIDGET_H
 
+#define COEFFICIENT_EQUATION 0.23
+
+
 #include <QWidget>
 #include <QPainter>
 #include <QMouseEvent>

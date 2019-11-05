@@ -122,14 +122,22 @@ void DrawGraphWidget::paintEvent(QPaintEvent *event)
                             painter->rotate(closesEdge->angle);
                         }
 
-                        if(closesEdge->nad)
+                        if(closesEdge->nad /*&& std::abs(k) > COEFFICIENT_EQUATION*/)
                         {
                             painter->drawArc(-width/2, -height/2, width, height, 180*16, 16 * 90);
                         }
-                        else
+                        else /*if(!closesEdge->nad && std::abs(k) > COEFFICIENT_EQUATION)*/
                         {
                             painter->drawArc(-width/2, -height/2, width, height, 270*16, 16 * 90);
                         }
+//                        else if(closesEdge->nad && std::abs(k) <= COEFFICIENT_EQUATION)
+//                        {
+//                            painter->drawArc(-width/2, -height/2, width, height, 0, 16 * 90);
+//                        }
+//                        else
+//                        {
+//                            painter->drawArc(-width/2, -height/2, width, height, 90*16, 16 * 90);
+//                        }
 
                         painter->resetTransform();
 
@@ -150,16 +158,22 @@ void DrawGraphWidget::paintEvent(QPaintEvent *event)
                             painter->rotate(closesEdge->angle);
                         }
 
-                        if(closesEdge->nad)
-
+                        if(closesEdge->nad /*&& std::abs(k) > COEFFICIENT_EQUATION*/)
                         {
                             painter->drawArc(-width/2, -height/2, width, height, 90*16, 90*16);
                         }
-                        else
-
+                        else /*if(!closesEdge->nad && std::abs(k) > COEFFICIENT_EQUATION)*/
                         {
                             painter->drawArc(-width/2, -height/2, width, height, 0, 90*16);
                         }
+//                        else if(closesEdge->nad && std::abs(k) <= COEFFICIENT_EQUATION)
+//                        {
+//                            painter->drawArc(-width/2, -height/2, width, height, 270*16, 16 * 90);
+//                        }
+//                        else
+//                        {
+//                            painter->drawArc(-width/2, -height/2, width, height, 180*16, 16 * 90);
+//                        }
                         painter->resetTransform();
                         QRect rect = QRect(closesEdge->mousePosition.rx() - 15, closesEdge->mousePosition.ry() - 10, 30, 20);
                         painter->drawText(rect, QString::number(closesEdge->weight));
@@ -229,8 +243,10 @@ void DrawGraphWidget::mousePressEvent(QMouseEvent *event)
     {
         needShowMenu = true;
     }
-
-    selectedEdge = graphData->getEdge(QPoint(X, Y));
+    if(needEdge)
+    {
+        selectedEdge = graphData->getEdge(QPoint(X, Y));
+    }
 
     std::shared_ptr<Vertex> closestVert = graphData->getVertex(X, Y, dist);
 
@@ -245,7 +261,7 @@ void DrawGraphWidget::mousePressEvent(QMouseEvent *event)
         }
         needRepaint = true;
     }
-    else if(!closestVert && !needShowMenu && !selectedEdge)
+    else if(!closestVert && !needShowMenu && !selectedEdge && !needEdge)
     {
         std::shared_ptr<Vertex> v = std::make_shared<Vertex>(X, Y, QString::number(rand() % 356).toStdString());
         graphData->addVertex(v);
@@ -396,9 +412,21 @@ void DrawGraphWidget::calculateEdge(std::shared_ptr<Edge> edge, QPoint mousePosi
     std::shared_ptr<Vertex> v1 = graphData->getVertex(edge->v1Index);
     std::shared_ptr<Vertex> v2 = graphData->getVertex(edge->v2Index);
 
-    double k = (v2->coordX-v1->coordX)/(v2->coordY-v1->coordY);
+    double k ;
+//    if(v2->coordX == v1->coordX && v2->coordY > v1->coordY)
+//    {
+//        k = 0.1E-4;
+//    }
+//    else if(v2->coordX == v1->coordX && v2->coordY < v1->coordY)
+//    {
+//        k = - 0.1E-4;
+//    }
+//    else
+//    {
+        k = (v2->coordX-v1->coordX)/(v2->coordY-v1->coordY);
+//    }
 
-    if(v1->coordX > v2->coordX)
+    if(v1->coordX >= v2->coordX)
     {
         std::swap(v1, v2);
     }
@@ -411,7 +439,15 @@ void DrawGraphWidget::calculateEdge(std::shared_ptr<Edge> edge, QPoint mousePosi
     double y1 = v1->coordY;
     double y2 = v2->coordY;
 
-    double yRes = ((x2 * y1 - x1 * y2) - (y1 - y2) * X) / (x2 - x1);
+    double yRes ;
+    if(x1 == x2)
+    {
+        yRes = 0;
+    }
+    else
+    {
+        yRes = ((x2 * y1 - x1 * y2) - (y1 - y2) * X) / (x2 - x1);
+    }
 
     double yResLower = -k*(X-x1) + y1;
     double yResUpper = -k*(X-x2) + y2;
@@ -430,9 +466,9 @@ void DrawGraphWidget::calculateEdge(std::shared_ptr<Edge> edge, QPoint mousePosi
         if(X < x1 && Y < y1)edge->angle = -edge->angle;
 
     }
-    else if((Y > yResLower && Y < yResUpper) || (Y < yResLower && Y > yResUpper))
+    else if((Y >= yResLower && Y <= yResUpper) || (Y <= yResLower && Y >= yResUpper))
     {
-        if(Y > yRes)
+        if((Y >= yRes && k > 0 ) || (yRes == 0 && X < x1))
         {
             edge->nad = false;
         }
@@ -473,7 +509,14 @@ void DrawGraphWidget::calculateEdge(std::shared_ptr<Edge> edge, QPoint mousePosi
         edge->heightWidth1 = QPoint(2 * a1, 2 * d);
         edge->heightWidth2 = QPoint(2 * a2, 2 * d);
 
-        edge->angle = 180 - 180 * std::acos(std::abs(X-coordX) / d)/M_PI;
+//        if(std::abs(k) < COEFFICIENT_EQUATION)
+//        {
+//            edge->angle = 180 * std::acos(std::abs(X-coordX) / d)/M_PI;
+//        }
+//        else
+//        {
+            edge->angle = 180 - 180 * std::acos(std::abs(X-coordX) / d)/M_PI;
+//        }
     }
 }
 
@@ -503,7 +546,7 @@ void DrawGraphWidget::calculateEdgeMoveVertex(std::shared_ptr<Edge> edge)
 //        edge->nad = !edge->nad;
 //    }
 
-    if((k > 0 && !edge->nad) || (k < 0 && edge->nad))
+    if((k >= 0 && !edge->nad) || (k <= 0 && edge->nad))
     {
         coeff = -coeff;
     }
