@@ -27,7 +27,7 @@ void DrawGraphWidget::showVertexMenu(std::shared_ptr<Vertex> vert, QPoint pos)
     });
     QAction *loopAction = new QAction("Добавить петлю");
     connect(loopAction, &QAction::triggered, [=](){
-        graphData->setLoop(vert);
+        graphData->setLoopM(vert);
         this->update();
     });
     actions.append(deleteAction);
@@ -122,22 +122,14 @@ void DrawGraphWidget::paintEvent(QPaintEvent *event)
                             painter->rotate(closesEdge->angle);
                         }
 
-                        if(closesEdge->nad /*&& std::abs(k) > COEFFICIENT_EQUATION*/)
+                        if(closesEdge->nad)
                         {
                             painter->drawArc(-width/2, -height/2, width, height, 180*16, 16 * 90);
                         }
-                        else /*if(!closesEdge->nad && std::abs(k) > COEFFICIENT_EQUATION)*/
+                        else
                         {
                             painter->drawArc(-width/2, -height/2, width, height, 270*16, 16 * 90);
                         }
-//                        else if(closesEdge->nad && std::abs(k) <= COEFFICIENT_EQUATION)
-//                        {
-//                            painter->drawArc(-width/2, -height/2, width, height, 0, 16 * 90);
-//                        }
-//                        else
-//                        {
-//                            painter->drawArc(-width/2, -height/2, width, height, 90*16, 16 * 90);
-//                        }
 
                         painter->resetTransform();
 
@@ -158,22 +150,14 @@ void DrawGraphWidget::paintEvent(QPaintEvent *event)
                             painter->rotate(closesEdge->angle);
                         }
 
-                        if(closesEdge->nad /*&& std::abs(k) > COEFFICIENT_EQUATION*/)
+                        if(closesEdge->nad)
                         {
                             painter->drawArc(-width/2, -height/2, width, height, 90*16, 90*16);
                         }
-                        else /*if(!closesEdge->nad && std::abs(k) > COEFFICIENT_EQUATION)*/
+                        else
                         {
                             painter->drawArc(-width/2, -height/2, width, height, 0, 90*16);
                         }
-//                        else if(closesEdge->nad && std::abs(k) <= COEFFICIENT_EQUATION)
-//                        {
-//                            painter->drawArc(-width/2, -height/2, width, height, 270*16, 16 * 90);
-//                        }
-//                        else
-//                        {
-//                            painter->drawArc(-width/2, -height/2, width, height, 180*16, 16 * 90);
-//                        }
                         painter->resetTransform();
                         QRect rect = QRect(closesEdge->mousePosition.rx() - 15, closesEdge->mousePosition.ry() - 10, 30, 20);
                         painter->drawText(rect, QString::number(closesEdge->weight));

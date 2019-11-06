@@ -40,10 +40,20 @@ void MainWindow::initGraph()
     graph->addVertex(v4);
     graph->addVertex(v5);
 
+
     graph->setEdge(std::make_shared<Edge>(0, 2, 3));
     graph->setEdge(std::make_shared<Edge>(1, 2, 3));
     graph->setEdge(std::make_shared<Edge>(2, 3, 3));
     graph->setEdge(std::make_shared<Edge>(3, 4, 3));
+
+    std::vector<std::vector<double>> matrix{
+        {0,5,3,2,1},
+        {0,0,0,0,0},
+        {0,4,0,0,4},
+        {0,0,0,0,0},
+        {0,6,0,6,8}
+      };
+    graph->setMatrixEdges(matrix);
 
     //ui->widget->update();
     ui->tab_1->setGraphData(graph);

@@ -115,17 +115,34 @@ public:
         return vertexes[index];
     }
 
-    inline void setLoop(std::shared_ptr<Vertex> vert)
+    inline void setLoopM(std::shared_ptr<Vertex> vert)
     {
         size_t index = indexOfVertex(vert);
-        std::shared_ptr<Edge> edge = std::make_shared<Edge>(index, index, 1);
+
+        this->setEdge(calculateLoop(index, 1));
+    }
+
+    inline void setLoop(std::shared_ptr<Vertex> vert, double weight)
+    {
+        size_t index = indexOfVertex(vert);
+
+        this->setEdge(calculateLoop(index, weight));
+    }
+
+    std::shared_ptr<Edge> calculateLoop(int index, double weight)
+    {
+        std::shared_ptr<Edge> edge = std::make_shared<Edge>(index, index, weight);
         edge->isNormal = false;
         edge->isLoop = true;
-        edge->mousePosition = QPoint(vert->coordX, vert->coordY - 60);
         edge->heightWidth1 = QPoint(60, 30);
-        edge->angle = 0;
-        this->setEdge(edge);
+        edge->angle = 10*edges[index][index].size();
+        double coordX = vert->coordX + 60 * std::sin(M_PI * edge->angle/180);
+        double coordY = vert->coordY - 60 * std::cos(M_PI * edge->angle/180);
+        edge->mousePosition = QPoint(coordX, coordY);
+
+        return edge;
     }
+
 
     inline std::shared_ptr<Vertex> getVertex(const std::string s)
     {
@@ -275,8 +292,35 @@ public:
                 }
             }
         }
-        qDebug() << vertexes.size();
+    }
 
+    void setMatrixEdges(std::vector<std::vector<double>> &matrix)
+    {
+        for(int i = 0; i < matrix.size(); i++)
+        {
+            for(int j = i; j < matrix.size(); j++)
+            {
+                if(matrix[i][j] != 0)
+                {
+                    if(i == j)
+                    {
+                        setLoop(getVertex(i), matrix[i][j]);
+                    }
+                    else if(matrix[i][j] == matrix[j][i])
+                    {
+                        setEdge(std::make_shared<Edge>(i, j, matrix[i][j]));
+                    }
+                    else
+                    {
+                        setEdge(std::make_shared<Edge>(i, j, matrix[i][j], true, true));
+                        if(matrix[j][i] != 0)
+                        {
+                            setEdge(std::make_shared<Edge>(i, j, matrix[j][i], true, false));
+                        }
+                    }
+                }
+            }
+        }
     }
 
 private:
