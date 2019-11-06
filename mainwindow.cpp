@@ -30,7 +30,7 @@ void MainWindow::initGraph()
     graph = std::make_shared<GraphData>();
 
     std::shared_ptr<Vertex> v1 = std::make_shared<Vertex>(100.0, 100.0, "name1");
-    std::shared_ptr<Vertex> v2 = std::make_shared<Vertex>(100.0, 200.0, "name2");
+    std::shared_ptr<Vertex> v2 = std::make_shared<Vertex>(103.0, 200.0, "name2");
     std::shared_ptr<Vertex> v3 = std::make_shared<Vertex>(200.0, 150.0, "name3");
     std::shared_ptr<Vertex> v4 = std::make_shared<Vertex>(300.0, 150.0, "name4");
     std::shared_ptr<Vertex> v5 = std::make_shared<Vertex>(350.0, 300.0, "name5");

@@ -412,19 +412,7 @@ void DrawGraphWidget::calculateEdge(std::shared_ptr<Edge> edge, QPoint mousePosi
     std::shared_ptr<Vertex> v1 = graphData->getVertex(edge->v1Index);
     std::shared_ptr<Vertex> v2 = graphData->getVertex(edge->v2Index);
 
-    double k ;
-//    if(v2->coordX == v1->coordX && v2->coordY > v1->coordY)
-//    {
-//        k = 0.1E-4;
-//    }
-//    else if(v2->coordX == v1->coordX && v2->coordY < v1->coordY)
-//    {
-//        k = - 0.1E-4;
-//    }
-//    else
-//    {
-        k = (v2->coordX-v1->coordX)/(v2->coordY-v1->coordY);
-//    }
+    double k = (v2->coordX-v1->coordX)/(v2->coordY-v1->coordY);
 
     if(v1->coordX >= v2->coordX)
     {
@@ -440,9 +428,9 @@ void DrawGraphWidget::calculateEdge(std::shared_ptr<Edge> edge, QPoint mousePosi
     double y2 = v2->coordY;
 
     double yRes ;
-    if(x1 == x2)
+    if(std::abs(x1 - x2) < 10)
     {
-        yRes = 0;
+        yRes = y1 + edge->a1_a * std::abs(y1 - y2);
     }
     else
     {
@@ -468,7 +456,7 @@ void DrawGraphWidget::calculateEdge(std::shared_ptr<Edge> edge, QPoint mousePosi
     }
     else if((Y >= yResLower && Y <= yResUpper) || (Y <= yResLower && Y >= yResUpper))
     {
-        if((Y >= yRes && k > 0 ) || (yRes == 0 && X < x1))
+        if(Y >= yRes)
         {
             edge->nad = false;
         }
@@ -509,14 +497,14 @@ void DrawGraphWidget::calculateEdge(std::shared_ptr<Edge> edge, QPoint mousePosi
         edge->heightWidth1 = QPoint(2 * a1, 2 * d);
         edge->heightWidth2 = QPoint(2 * a2, 2 * d);
 
-//        if(std::abs(k) < COEFFICIENT_EQUATION)
-//        {
-//            edge->angle = 180 * std::acos(std::abs(X-coordX) / d)/M_PI;
-//        }
-//        else
-//        {
-            edge->angle = 180 - 180 * std::acos(std::abs(X-coordX) / d)/M_PI;
-//        }
+        double cos_angle = std::abs(X-coordX) / d;
+        if(cos_angle > 1)
+        {
+            cos_angle = 1;
+        }
+        edge->angle = 180 - 180 * std::acos(cos_angle)/M_PI;
+//          qDebug() << edge->heightWidth1 << edge->heightWidth2 << edge->angle;
+//          qDebug() << std::abs(X-coordX) / d;
     }
 }
 
@@ -525,6 +513,13 @@ void DrawGraphWidget::calculateEdgeMoveVertex(std::shared_ptr<Edge> edge)
 
     std::shared_ptr<Vertex> v1 = graphData->getVertex(edge->v1Index);
     std::shared_ptr<Vertex> v2 = graphData->getVertex(edge->v2Index);
+
+    //double k = (v2->coordX-v1->coordX)/(v2->coordY-v1->coordY);
+
+    if(v1->coordX >= v2->coordX)
+    {
+        std::swap(v1, v2);
+    }
 
     double x1 = v1->coordX;
     double x2 = v2->coordX;
@@ -541,11 +536,6 @@ void DrawGraphWidget::calculateEdgeMoveVertex(std::shared_ptr<Edge> edge)
 
     double  coeff = d / std::sqrt(k*k + 1);
 
-//    if(x1 == x2)
-//    {
-//        edge->nad = !edge->nad;
-//    }
-
     if((k >= 0 && !edge->nad) || (k <= 0 && edge->nad))
     {
         coeff = -coeff;
@@ -554,7 +544,6 @@ void DrawGraphWidget::calculateEdgeMoveVertex(std::shared_ptr<Edge> edge)
 
     X2 = X1 + coeff;
     Y2 = Y1 - k*(coeff);
-
 
     calculateEdge(edge, QPoint(X2, Y2));
 }
