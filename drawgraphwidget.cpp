@@ -426,8 +426,6 @@ void DrawGraphWidget::calculateEdgeMoveVertex(std::shared_ptr<Edge> edge)
 
         X = x1 + (x2-x1) * edge->a1_a + coeff;
         Y = y1 + (y2-y1) * edge->a1_a - k*(coeff);
-        //qDebug()<< "1: " << QPoint(x1,y1) << " XY : " << QPoint(X, Y) << " 2: " << QPoint(x2, y2);
-        qDebug() << "k: " << k;
 
         graphData->calculateEdge(edge, QPoint(X, Y), needEdge);
     }

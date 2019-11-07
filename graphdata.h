@@ -444,12 +444,10 @@ public:
             if(Y >= yRes)
             {
                 edge->nad = false;
-                qDebug() << "nad false";
             }
             else
             {
                 edge->nad = true;
-                qDebug() << "nad true";
             }
 
 
@@ -474,12 +472,10 @@ public:
                 if((k > 0 && edge->nad) || (k < 0 && !edge->nad))
                 {
                     edge->upNorm = true;
-                    qDebug() << "upNorm true";
                 }
                 else
                 {
                     edge->upNorm = false;
-                    qDebug() << "upNorm false";
                 }
             }
 
@@ -499,11 +495,9 @@ public:
             {
                 cos_angle = 1;
             }
-            //qDebug() << "c1: " << edge->coords1 << " hw1: " << edge->heightWidth1 << " hw2: " << edge->heightWidth2;
 
             edge->angle = 180 - 180 * std::acos(cos_angle)/M_PI;
 
-            //qDebug() << "angle: " << edge->angle;
         }
     }
 
