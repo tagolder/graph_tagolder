@@ -59,6 +59,8 @@ void MainWindow::initGraph()
     ui->tab_1->setGraphData(graph);
     //ui->tabWidget->setUpdatesEnabled(false);
     ui->tabWidget->setTabsClosable(true);
+    connect(ui->tab_1, SIGNAL(setMatrix()), this, SLOT(setMatixOnTable()));
+//    ui->tab_1->setModelTable(ui->tab_1->model);
 }
 
 
@@ -152,6 +154,7 @@ void MainWindow::on_toolButton_clicked()
     std::shared_ptr<GraphData> g = std::make_shared<GraphData>();
     DrawGraphWidget *widget = new DrawGraphWidget();
     widget->setGraphData(g);
+    connect(widget, SIGNAL(setMatrix()), this, SLOT(setMatixOnTable()));
 
     ui->tabWidget->addTab(widget, QString::number(ui->tabWidget->count()));
 
@@ -178,4 +181,43 @@ void MainWindow::on_vertexButtonTask_clicked()
     ui->edgeButtonTask->setStyleSheet("background-color: white");
     ui->vertexButtonTask->setStyleSheet("background-color: grey");
     ui->toolButton->setStyleSheet("background-color: white");
+}
+
+void MainWindow::keyReleaseEvent(QKeyEvent *event)
+{
+    if(event->key() == Qt::Key_1)
+    {
+        on_edgeButtonTask_clicked();
+    }
+    if(event->key() == Qt::Key_3)
+    {
+        on_vertexButtonTask_clicked();
+    }
+    if(event->key() == Qt::Key_2)
+    {
+        on_toolButton_clicked();
+    }
+
+}
+
+void MainWindow::setMatixOnTable()
+{
+    DrawGraphWidget *w = (DrawGraphWidget *)ui->tabWidget->currentWidget();
+    const std::vector<std::vector<std::vector<std::shared_ptr<Edge>>>> &matrix = w->getGraphData()->getEdges();
+    int size = matrix.size();
+    model->setRowCount(size);
+    model->setColumnCount(size);
+    for(int i = 0; i < size; i++)
+    {
+        for(int j = 0; j < size; j++)
+        {
+            double summ = 0;
+            for(int k = 0; k < matrix.at(i).at(j).size(); k++)
+            {
+                summ += matrix.at(i).at(j).at(k)->weight;
+            }
+            QStandardItem *item = new QStandardItem(QString::number(summ));
+            model->setItem(i, j, item);
+        }
+    }
 }

@@ -3,7 +3,6 @@
 
 #define COEFFICIENT_EQUATION 0.23
 
-
 #include <QWidget>
 #include <QPainter>
 #include <QMouseEvent>
@@ -11,6 +10,8 @@
 #include <QMenu>
 #include <QPolygonF>
 #include <cstdlib>
+#include <QStandardItemModel>
+#include <QStandardItem>
 
 #include "graphdata.h"
 
@@ -36,7 +37,8 @@ public:
     //void calculatePolygon(QPoint v1, QPoint v2, QPoint mousePos);
     void calculateEdgeMoveVertex(std::shared_ptr<Edge> edge);
     std::shared_ptr<GraphData> getGraphData();
-
+    void setMatixOnTable();
+    void setModelTable(QStandardItemModel &model);
     bool needEdge = false;
 
 protected:
@@ -60,6 +62,12 @@ private:
 
     QPoint mouseCoord;
 
+signals:
+    void setMatrix();
+//    void update()
+//    {
+//        DrawGraphWidget::update();
+//    }
 };
 
 #endif // DRAWGRAPHWIDGET_H

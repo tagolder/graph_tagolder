@@ -214,6 +214,7 @@ void DrawGraphWidget::paintEvent(QPaintEvent *event)
     }
     painter->end();
     delete painter;
+    emit setMatrix();
 }
 
 void DrawGraphWidget::mousePressEvent(QMouseEvent *event)
@@ -370,26 +371,21 @@ void DrawGraphWidget::mouseReleaseEvent(QMouseEvent *event)
     selectedVertex = std::shared_ptr<Vertex>();
     newSelectedVertex = std::shared_ptr<Vertex>();
     selectedEdge = std::shared_ptr<Edge>();
+
 }
 
 void DrawGraphWidget::keyPressEvent(QKeyEvent *event)
 {
-    if(event->key() == Qt::Key_Control)
-    {
-        needEdge = true;
-    }
+//    if(event->key() == Qt::Key_Control)
+//    {
+//        needEdge = true;
+//    }
 }
 
 void DrawGraphWidget::keyReleaseEvent(QKeyEvent *event)
 {
-    if(event->key() == Qt::Key_Control)
-    {
-        needEdge = false;
-    }
 
 }
-
-
 
 void DrawGraphWidget::calculateEdgeMoveVertex(std::shared_ptr<Edge> edge)
 {
@@ -397,10 +393,15 @@ void DrawGraphWidget::calculateEdgeMoveVertex(std::shared_ptr<Edge> edge)
     std::shared_ptr<Vertex> v1 = graphData->getVertex(edge->v1Index);
     std::shared_ptr<Vertex> v2 = graphData->getVertex(edge->v2Index);
 
+//    if(v1->coordY > v2->coordY)
+//    {
+//        std::swap(v1, v2);
+//    }
     double x1 = v1->coordX;
     double x2 = v2->coordX;
     double y1 = v1->coordY;
     double y2 = v2->coordY;
+
 
     double X, Y;
 
@@ -435,6 +436,8 @@ std::shared_ptr<GraphData> DrawGraphWidget::getGraphData()
 {
     return graphData;
 }
+
+
 
 
 

@@ -11,6 +11,7 @@
 #include <QDebug>
 #include <QList>
 #include <QLayout>
+#include <QTableView>
 
 
 namespace Ui {
@@ -29,9 +30,11 @@ public:
     void parseVertexFile(QString);
     void parseEdgeFile(QString);
     void parseMatrix(QList<QString>);
-
+protected:
+    void keyReleaseEvent(QKeyEvent *event);
 private:
     Ui::MainWindow *ui;
+    std::vector<std::vector<double>> matrixRes;
     QStandardItemModel *model = new QStandardItemModel();
     std::shared_ptr<GraphData> current_graph = std::make_shared<GraphData>();
     std::shared_ptr<GraphData> graph = std::make_shared<GraphData>();
@@ -45,6 +48,7 @@ private slots:
     void on_toolButton_clicked();
     void on_edgeButtonTask_clicked();
     void on_vertexButtonTask_clicked();
+    void setMatixOnTable();
 };
 
 #endif // MAINWINDOW_H
