@@ -33,11 +33,8 @@ public:
 
     void showVertexMenu(std::shared_ptr<Vertex> vert, QPoint pos);
     void showEdgeMenu(std::shared_ptr<Edge> edge, QPoint pos);
-    //void calculatePolygon(QPointF v1, QPointF v2, QPointF mousePos);
-    void calculateEdge(std::shared_ptr<Edge> edge, QPoint mousePosition);
+    //void calculatePolygon(QPoint v1, QPoint v2, QPoint mousePos);
     void calculateEdgeMoveVertex(std::shared_ptr<Edge> edge);
-    //bool calculateEdgeMoveVertex(std::shared_ptr<Edge> edge, std::shared_ptr<Vertex> moveVertex, QPoint mousePosition);
-    void coordsMouseLoop(std::shared_ptr<Edge> edge);
     std::shared_ptr<GraphData> getGraphData();
 
     bool needEdge = false;
