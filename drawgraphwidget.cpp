@@ -1,9 +1,6 @@
 #include "drawgraphwidget.h"
 #include "ui_drawgraphwidget.h"
 
-//Проерить функцию движения петель
-
-
 DrawGraphWidget::DrawGraphWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::DrawGraphWidget)
@@ -11,6 +8,7 @@ DrawGraphWidget::DrawGraphWidget(QWidget *parent) :
     ui->setupUi(this);
     this->setMouseTracking(true);
     setFocus();
+    emit setMatrix();
 }
 
 DrawGraphWidget::~DrawGraphWidget()
@@ -214,7 +212,6 @@ void DrawGraphWidget::paintEvent(QPaintEvent *event)
     }
     painter->end();
     delete painter;
-    emit setMatrix();
 }
 
 void DrawGraphWidget::mousePressEvent(QMouseEvent *event)
@@ -349,7 +346,6 @@ void DrawGraphWidget::mouseReleaseEvent(QMouseEvent *event)
             if(closestVert)
             {
                 graphData->setEdge(std::make_shared<Edge>(selectedVertex->index, closestVert->index, 1));
-                //needEdge = false;
                 needRepaint = true;
             }
 
@@ -372,20 +368,9 @@ void DrawGraphWidget::mouseReleaseEvent(QMouseEvent *event)
     newSelectedVertex = std::shared_ptr<Vertex>();
     selectedEdge = std::shared_ptr<Edge>();
 
+    emit setMatrix();
 }
 
-void DrawGraphWidget::keyPressEvent(QKeyEvent *event)
-{
-//    if(event->key() == Qt::Key_Control)
-//    {
-//        needEdge = true;
-//    }
-}
-
-void DrawGraphWidget::keyReleaseEvent(QKeyEvent *event)
-{
-
-}
 
 void DrawGraphWidget::calculateEdgeMoveVertex(std::shared_ptr<Edge> edge)
 {
@@ -393,10 +378,6 @@ void DrawGraphWidget::calculateEdgeMoveVertex(std::shared_ptr<Edge> edge)
     std::shared_ptr<Vertex> v1 = graphData->getVertex(edge->v1Index);
     std::shared_ptr<Vertex> v2 = graphData->getVertex(edge->v2Index);
 
-//    if(v1->coordY > v2->coordY)
-//    {
-//        std::swap(v1, v2);
-//    }
     double x1 = v1->coordX;
     double x2 = v2->coordX;
     double y1 = v1->coordY;
@@ -418,7 +399,7 @@ void DrawGraphWidget::calculateEdgeMoveVertex(std::shared_ptr<Edge> edge)
 
         double k =(x2-x1)/(y2-y1);
 
-        if((!(y2>y1) && edge->upNorm) || (!(y2<y1) && !edge->upNorm))
+        if((!(y1<y2) && edge->upNorm) || (!(y1>y2) && !edge->upNorm))
         {
             d = -d;
         }
@@ -436,8 +417,4 @@ std::shared_ptr<GraphData> DrawGraphWidget::getGraphData()
 {
     return graphData;
 }
-
-
-
-
 

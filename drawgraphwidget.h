@@ -34,20 +34,18 @@ public:
 
     void showVertexMenu(std::shared_ptr<Vertex> vert, QPoint pos);
     void showEdgeMenu(std::shared_ptr<Edge> edge, QPoint pos);
-    //void calculatePolygon(QPoint v1, QPoint v2, QPoint mousePos);
     void calculateEdgeMoveVertex(std::shared_ptr<Edge> edge);
     std::shared_ptr<GraphData> getGraphData();
-    void setMatixOnTable();
+//    void setMatixOnTable();
     void setModelTable(QStandardItemModel &model);
     bool needEdge = false;
+//    void setMatrixTable(std::vector<std::vector<double>> &matrix);
 
 protected:
     void paintEvent(QPaintEvent *event);
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
-    void keyPressEvent(QKeyEvent *event);
-    void keyReleaseEvent(QKeyEvent *event);
 private:
 
     Ui::DrawGraphWidget *ui;
@@ -64,10 +62,6 @@ private:
 
 signals:
     void setMatrix();
-//    void update()
-//    {
-//        DrawGraphWidget::update();
-//    }
 };
 
 #endif // DRAWGRAPHWIDGET_H

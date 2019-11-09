@@ -9,15 +9,13 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    ui->table->setModel(model);
-
     initGraph();
 
     ui->edgeButtonTask->setStyleSheet("background-color: white");
     ui->vertexButtonTask->setStyleSheet("background-color: grey");
     ui->toolButton->setStyleSheet("background-color: white");
-
     ui->tabWidget->removeTab(1);
+    ui->centralWidget->setLayout(ui->horizontalLayout_2);
 }
 
 MainWindow::~MainWindow()
@@ -48,27 +46,24 @@ void MainWindow::initGraph()
 
     std::vector<std::vector<double>> matrix{
         {0,5,0,0,0},
-        {6,0,0,0,0},
-        {0,0,0,0,0},
-        {0,0,0,0,0},
-        {0,0,0,0,0}
+        {6,1,0,0,0},
+        {0,0,0,0,3},
+        {0,0,0,1,0},
+        {0,0,3,0,0}
       };
     graph->setMatrixEdges(matrix);
 
-    //ui->widget->update();
     ui->tab_1->setGraphData(graph);
-    //ui->tabWidget->setUpdatesEnabled(false);
     ui->tabWidget->setTabsClosable(true);
     connect(ui->tab_1, SIGNAL(setMatrix()), this, SLOT(setMatixOnTable()));
-//    ui->tab_1->setModelTable(ui->tab_1->model);
 }
 
 
-void MainWindow::on_spin_valueChanged(int arg1)
-{
-    model->setColumnCount(arg1);
-    model->setRowCount(arg1);
-}
+//void MainWindow::on_spin_valueChanged(int arg1)
+//{
+//    model->setColumnCount(arg1);
+//    model->setRowCount(arg1);
+//}
 
 void MainWindow::on_openFileBut_clicked()
 {
@@ -155,6 +150,7 @@ void MainWindow::on_toolButton_clicked()
     DrawGraphWidget *widget = new DrawGraphWidget();
     widget->setGraphData(g);
     connect(widget, SIGNAL(setMatrix()), this, SLOT(setMatixOnTable()));
+//    connect(model, SIGNAL(itemChanged(QStandardItem*)))
 
     ui->tabWidget->addTab(widget, QString::number(ui->tabWidget->count()));
 
@@ -197,16 +193,21 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
     {
         on_toolButton_clicked();
     }
-
 }
 
 void MainWindow::setMatixOnTable()
 {
+    needSetMatrix = false;
     DrawGraphWidget *w = (DrawGraphWidget *)ui->tabWidget->currentWidget();
     const std::vector<std::vector<std::vector<std::shared_ptr<Edge>>>> &matrix = w->getGraphData()->getEdges();
     int size = matrix.size();
-    model->setRowCount(size);
-    model->setColumnCount(size);
+    ui->table->setRowCount(size);
+    ui->table->setColumnCount(size);
+    matrixRes.resize(size);
+    for(int i = 0; i < size; i++)
+    {
+        matrixRes[i].resize(size);
+    }
     for(int i = 0; i < size; i++)
     {
         for(int j = 0; j < size; j++)
@@ -216,8 +217,34 @@ void MainWindow::setMatixOnTable()
             {
                 summ += matrix.at(i).at(j).at(k)->weight;
             }
-            QStandardItem *item = new QStandardItem(QString::number(summ));
-            model->setItem(i, j, item);
+            matrixRes[i][j] = summ;
+            ui->table->setItem(i, j, new QTableWidgetItem(QString::number(summ)));
         }
+    }
+    needSetMatrix = true;
+}
+
+void MainWindow::setTableOnMatrix()
+{
+    int size = matrixRes.size();
+    for(int i = 0; i < size; i++)
+    {
+        for(int j = 0; j < size; j++)
+        {
+            matrixRes[i][j] = ui->table->item(i, j)->text().toDouble();
+        }
+    }
+}
+
+void MainWindow::on_table_cellChanged(int row, int column)
+{
+    if(needSetMatrix)
+    {
+        matrixRes[row][column] = ui->table->item(row, column)->text().toDouble();
+
+        DrawGraphWidget *w = (DrawGraphWidget *)ui->tabWidget->currentWidget();
+
+        w->getGraphData()->setMatrixEdges(matrixRes);
+        w->update();
     }
 }

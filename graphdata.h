@@ -22,7 +22,7 @@ struct Vertex
     std::string name = "";
     uint index = 0;
     QColor color = Qt::green;
-    double drawDiam = 30.0;
+    double drawDiam = 20.0;
 };
 
 struct Edge
@@ -30,7 +30,10 @@ struct Edge
     Edge(const int _v1Index, const int _v2Index, const double _weight, bool _isDir = false, bool _dirTo = true):
        v1Index(_v1Index), v2Index(_v2Index), weight(_weight), isDir(_isDir), dirTo(_dirTo)
     {
-
+        if(_v1Index > _v2Index)
+        {
+            std::swap(v1Index, v2Index);
+        }
     }
     std::string index;
     int v1Index, v2Index;
@@ -86,8 +89,13 @@ public:
     // dirTo = false - От второго узла к первому, true - от первого ко второму
     inline void setEdge(std::shared_ptr<Edge> edge, bool isDir = false, bool dirTo = true)
     {
-        const int i = edge->v1Index;
-        const int j = edge->v2Index;
+       int i = edge->v1Index;
+       int j = edge->v2Index;
+
+       if(i > j)
+       {
+           std::swap(i, j);
+       }
 
        int n = edges[i][j].size();
 
@@ -103,7 +111,6 @@ public:
 
            double coordX1 = x1 + (x2-x1)/2 + std::pow(-1, n)*n*d*std::sin(std::atan((x2-x1)/(y2-y1)) + M_PI/2)/15;
            double coordY1 = y1 + (y2-y1)/2 - (x2-x1)/(y2-y1) * (coordX1 - x1 - (x2-x1)/2);
-           qDebug() << QPoint(coordX1, coordY1) << d;
 
            if(n)
            {
@@ -155,6 +162,8 @@ public:
         size_t index = indexOfVertex(vert);
 
         this->setEdge(calculateLoop(index, 1));
+
+//        edges[index][index].push_back();
     }
 
     inline void setLoop(std::shared_ptr<Vertex> vert, double weight)
@@ -174,8 +183,6 @@ public:
         double coordX = getVertex(index)->coordX + 60 * std::sin(M_PI * edge->angle/180);
         double coordY = getVertex(index)->coordY - 60 * std::cos(M_PI * edge->angle/180);
         edge->mousePosition = QPoint(coordX, coordY);
-
-        qDebug() << edge->mousePosition << edge->heightWidth1 << edge->angle;
 
         return edge;
     }
@@ -245,7 +252,6 @@ public:
                 double y2 = v2->coordY;
 
                 double yRes = ((x2 * y1 - x1 * y2) - (y1 - y2) * x) / (x2 - x1);
-                qDebug() << yRes << y;
                 if(std::abs(yRes - y) < 8)
                 {
                     return true;
@@ -337,6 +343,8 @@ public:
         {
             for(int j = i; j < matrix.size(); j++)
             {
+                edges[i][j].clear();
+                edges[j][i].clear();
                 if(matrix[i][j] != 0 || matrix[j][i] != 0)
                 {
                     if(i == j)
@@ -353,19 +361,18 @@ public:
                         double y1 = getVertex(i)->coordY;
                         double x2 = getVertex(j)->coordX;
                         double y2 = getVertex(j)->coordY;
-                        double coordX1 = x1 + (x2-x1)/2 + 30 * std::cos(std::atan((x2-x1)/(y2-y1)) + M_PI/2);
-                        double coordY1 = y1 + (y2-y1)/2 - (x2-x1)/(y2-y1) * (coordX1 - x1 - (x2-x1)/2);
 
                         if(matrix[i][j] != 0)
                         {
                             std::shared_ptr<Edge> edge = std::make_shared<Edge>(i, j, matrix[i][j], true, true);
+                            double coordX1 = x1 + (x2-x1)/2 + 50 * std::cos(std::atan((x2-x1)/(y2-y1)) + M_PI/2);
+                            double coordY1 = y1 + (y2-y1)/2 - (x2-x1)/(y2-y1) * (coordX1 - x1 - (x2-x1)/2);
+
 
                             if(x2==x1)
                             {
                                 coordX1 += 20;
                             }
-
-                            qDebug() << "1: " << QPoint(x1, y1) << " XY: " << QPoint(coordX1, coordY1) << " 2: " << QPoint(x2, y2);
 
                             edge->isDir = true;
                             edge->dirTo = true;
@@ -375,8 +382,8 @@ public:
                         }
                         if(matrix[j][i] != 0)
                         {
-                            std::shared_ptr<Edge> edge = std::make_shared<Edge>(j, i, matrix[j][i], true, true);
-                            double coordX1 = x1 + (x2-x1)/2 - 30 * std::cos(std::atan((x2-x1)/(y2-y1)) + M_PI/2);
+                            std::shared_ptr<Edge> edge = std::make_shared<Edge>(i, j, matrix[j][i], true, true);
+                            double coordX1 = x1 + (x2-x1)/2 - 50 * std::cos(std::atan((x2-x1)/(y2-y1)) + M_PI/2);
                             double coordY1 = y1 + (y2-y1)/2 - (x2-x1)/(y2-y1) * (coordX1 - x1 - (x2-x1)/2);
                             if(x2==x1)
                             {
@@ -415,14 +422,9 @@ public:
         double y2 = v2->coordY;
 
         double yRes ;
-//        if(std::abs(x1 - x2) < 10)
-//        {
-//            yRes = y1 + edge->a1_a * std::abs(y1 - y2);
-//        }
-//        else
-//        {
-            yRes = ((x2 * y1 - x1 * y2) - (y1 - y2) * X) / (x2 - x1);
-//        }
+
+        //if(x2 == x1)
+        yRes = ((x2 * y1 - x1 * y2) - (y1 - y2) * X) / (x2 - x1);
 
         double yResLower = -k*(X-x1) + y1;
         double yResUpper = -k*(X-x2) + y2;
@@ -430,7 +432,6 @@ public:
         if(edge->isLoop)
         {
             edge->mousePosition = mousePosition;
-//            qDebug() << edge->mousePosition << mousePosition;
             double d = std::sqrt((X-x1)*(X-x1) + (Y-y1)*(Y-y1));
             edge->heightWidth1 = QPoint(d, d/2);
             edge->angle = edge->angle = 180 * std::acos(std::abs(Y-v1->coordY) / d)/M_PI;
@@ -439,7 +440,6 @@ public:
             if(X < x1 && Y > y1)edge->angle += 180 ;
             if(X < x1 && Y < y1)edge->angle = -edge->angle;
 
-//            qDebug() << edge->heightWidth1 << edge->angle;
         }
         else if((Y >= yResLower && Y <= yResUpper) || (Y <= yResLower && Y >= yResUpper))
         {
@@ -479,7 +479,6 @@ public:
                 {
                     edge->upNorm = false;
                 }
-                qDebug() << edge->upNorm;
             }
 
             edge->isNormal = false;
