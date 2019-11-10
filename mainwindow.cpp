@@ -204,21 +204,44 @@ void MainWindow::setMatixOnTable()
     ui->table->setRowCount(size);
     ui->table->setColumnCount(size);
     matrixRes.resize(size);
+    QStringList nameList;
     for(int i = 0; i < size; i++)
     {
+        std::string name = w->getGraphData()->getVertex(i)->name;
+        nameList << QString::fromStdString(name);
         matrixRes[i].resize(size);
     }
+    ui->table->setHorizontalHeaderLabels(nameList);
+    ui->table->setVerticalHeaderLabels(nameList);
     for(int i = 0; i < size; i++)
     {
-        for(int j = 0; j < size; j++)
+        for(int j = i; j < size; j++)
         {
-            double summ = 0;
+            double summ_ij = 0;
+            double summ_ji = 0;
             for(int k = 0; k < matrix.at(i).at(j).size(); k++)
             {
-                summ += matrix.at(i).at(j).at(k)->weight;
+                if(matrix.at(i).at(j).at(k)->isDir)
+                {
+                    if(matrix.at(i).at(j).at(k)->dirTo)
+                    {
+                        summ_ij += matrix.at(i).at(j).at(k)->weight;
+                    }
+                    else
+                    {
+                        summ_ji += matrix.at(i).at(j).at(k)->weight;
+                    }
+                }
+                else
+                {
+                    summ_ij += matrix.at(i).at(j).at(k)->weight;
+                    summ_ji += matrix.at(i).at(j).at(k)->weight;
+                }
             }
-            matrixRes[i][j] = summ;
-            ui->table->setItem(i, j, new QTableWidgetItem(QString::number(summ)));
+            matrixRes[i][j] = summ_ij;
+            matrixRes[j][i] = summ_ji;
+            ui->table->setItem(i, j, new QTableWidgetItem(QString::number(summ_ij)));
+            ui->table->setItem(j, i, new QTableWidgetItem(QString::number(summ_ji)));
         }
     }
     needSetMatrix = true;
@@ -247,4 +270,10 @@ void MainWindow::on_table_cellChanged(int row, int column)
         w->getGraphData()->setMatrixEdges(matrixRes);
         w->update();
     }
+}
+
+void MainWindow::on_butAsImage_clicked()
+{
+    DrawGraphWidget *w = (DrawGraphWidget *)ui->tabWidget->currentWidget();
+    w->grab().save("/home/ya/Изображения/graphs/" + ui->tabWidget->tabText(ui->tabWidget->currentIndex()) + ".png");
 }

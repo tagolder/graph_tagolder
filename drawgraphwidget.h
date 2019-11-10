@@ -12,6 +12,7 @@
 #include <cstdlib>
 #include <QStandardItemModel>
 #include <QStandardItem>
+#include <QInputDialog>
 
 #include "graphdata.h"
 
@@ -30,10 +31,11 @@ public:
     inline void setGraphData(std::shared_ptr<GraphData> gData)
     {
         graphData = gData;
+        emit setMatrix();
     }
 
-    void showVertexMenu(std::shared_ptr<Vertex> vert, QPoint pos);
-    void showEdgeMenu(std::shared_ptr<Edge> edge, QPoint pos);
+    void showVertexMenu(std::shared_ptr<Vertex> vert);
+    void showEdgeMenu(std::shared_ptr<Edge> edge);
     void calculateEdgeMoveVertex(std::shared_ptr<Edge> edge);
     std::shared_ptr<GraphData> getGraphData();
 //    void setMatixOnTable();

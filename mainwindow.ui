@@ -153,6 +153,13 @@ margin-right : 40% </string>
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QPushButton" name="butAsImage">
+         <property name="text">
+          <string>Сохранить как изображение</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </item>
     </layout>

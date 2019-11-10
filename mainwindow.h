@@ -12,6 +12,7 @@
 #include <QList>
 #include <QLayout>
 #include <QTableView>
+#include <QStringList>
 
 
 namespace Ui {
@@ -49,6 +50,7 @@ private slots:
     void on_vertexButtonTask_clicked();
     void setMatixOnTable();
     void on_table_cellChanged(int row, int column);
+    void on_butAsImage_clicked();
 };
 
 #endif // MAINWINDOW_H

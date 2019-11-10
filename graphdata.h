@@ -16,10 +16,10 @@ struct Vertex
     Vertex(const double X, const double Y, const std::string &_name)
         : coordX(X), coordY(Y), name(_name)
     {
-
+//        name = QString::number(X) + QString::number(Y);
     }
     double coordX = 0+.0, coordY = 0.0;
-    std::string name = "";
+    std::string name= "";
     uint index = 0;
     QColor color = Qt::green;
     double drawDiam = 20.0;
@@ -38,8 +38,8 @@ struct Edge
     std::string index;
     int v1Index, v2Index;
     double weight = 1;
-    bool isDir = false;
-    bool dirTo = true;
+    bool isDir = false; // Напралено ли (пока нет)
+    bool dirTo = true; // От меньшего индекса к большему
     bool isNormal = true;
     bool nad = true;
     bool isLoop = false;
@@ -92,6 +92,9 @@ public:
        int i = edge->v1Index;
        int j = edge->v2Index;
 
+       edge->isDir = isDir;
+       edge->dirTo = dirTo;
+
        if(i > j)
        {
            std::swap(i, j);
@@ -99,8 +102,8 @@ public:
 
        int n = edges[i][j].size();
 
-        if(!edge->isLoop && edge->isNormal)
-        {
+       if(!edge->isLoop && edge->isNormal)
+       {
 
 
            double x1 = getVertex(i)->coordX;
@@ -109,6 +112,7 @@ public:
            double y2 = getVertex(j)->coordY;
            double d = std::sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
 
+
            double coordX1 = x1 + (x2-x1)/2 + std::pow(-1, n)*n*d*std::sin(std::atan((x2-x1)/(y2-y1)) + M_PI/2)/15;
            double coordY1 = y1 + (y2-y1)/2 - (x2-x1)/(y2-y1) * (coordX1 - x1 - (x2-x1)/2);
 
@@ -116,36 +120,55 @@ public:
            {
                calculateEdge(edge, QPoint(coordX1, coordY1));
            }
-
-//           if(x2==x1)
-//           {
-//               coordX1 += 20;
-//           }
-
         }
 
 
-        if (!isDir && !edge->isLoop)
-        {            
-            edges.at(i).at(j).push_back(edge);
-            edges.at(j).at(i).push_back(edge);
-        }
-        else if(!isDir && edge->isLoop)
-        {
-            edges.at(i).at(j).push_back(edge);
-        }
-        else
-        {
-           // От первого узла ко второму
-            if (dirTo)
-            {
-                edges[i][j].push_back(edge);
-            }
-            else
-            {
-                edges[j][i].push_back(edge);
-            }
-        }
+        edges.at(i).at(j).push_back(edge);
+
+//        qDebug() << isDir << dirTo << edges.at(i).at(j).size();
+//            edges.at(j).at(i).push_back(edge);
+//        qDebug() << "weight:" << edge->weight << "   " <<  i << j;
+
+
+//        const std::vector<std::vector<std::vector<std::shared_ptr<Edge>>>> &matrix = getEdges();
+//        int size = matrix.size();
+//        std::vector<std::vector<double>> res;
+//        res.resize(size);
+//        for(int i = 0; i < size; i++)
+//        {
+//            res[i].resize(size);
+//        }
+//        for(int i = 0; i < size; i++)
+//        {
+
+//            for(int j = i; j < size; j++)
+//            {
+//                double summ_ij = 0;
+//                double summ_ji = 0;
+//                for(int k = 0; k < matrix.at(i).at(j).size(); k++)
+//                {
+//                    if(matrix.at(i).at(j).at(k)->isDir)
+//                    {
+//                        if(matrix.at(i).at(j).at(k)->dirTo)
+//                        {
+//                            summ_ij += matrix.at(i).at(j).at(k)->weight;
+//                        }
+//                        else
+//                        {
+//                            summ_ji += matrix.at(i).at(j).at(k)->weight;
+//                        }
+//                    }
+//                    else
+//                    {
+//                        summ_ij += matrix.at(i).at(j).at(k)->weight;
+//                        summ_ji += matrix.at(i).at(j).at(k)->weight;
+//                    }
+//                }
+//                res[i][j] = summ_ij;
+//                res[j][i] = summ_ji;
+//            }
+//            qDebug() << res[i];
+//        }
     }
 
     inline std::shared_ptr<Vertex> getVertex(const size_t index)
@@ -362,10 +385,10 @@ public:
                         double x2 = getVertex(j)->coordX;
                         double y2 = getVertex(j)->coordY;
 
-                        if(matrix[i][j] != 0)
+                        if(matrix[i][j] != 0 && matrix[j][i] != 0)
                         {
-                            std::shared_ptr<Edge> edge = std::make_shared<Edge>(i, j, matrix[i][j], true, true);
-                            double coordX1 = x1 + (x2-x1)/2 + 50 * std::cos(std::atan((x2-x1)/(y2-y1)) + M_PI/2);
+                            std::shared_ptr<Edge> edge = std::make_shared<Edge>(i, j, matrix[i][j]);
+                            double coordX1 = x1 + (x2-x1)/2 + 50 * std::sin(std::atan((x2-x1)/(y2-y1)) + M_PI/2);
                             double coordY1 = y1 + (y2-y1)/2 - (x2-x1)/(y2-y1) * (coordX1 - x1 - (x2-x1)/2);
 
 
@@ -374,26 +397,41 @@ public:
                                 coordX1 += 20;
                             }
 
-                            edge->isDir = true;
-                            edge->dirTo = true;
+                            if(y2 == y1)
+                            {
+                                coordX1 = x1 + (x2-x1)/2;
+                                coordY1 = y1 - 50;
+                            }
 
                             calculateEdge(edge, QPoint(coordX1, coordY1));
-                            setEdge(edge);
-                        }
-                        if(matrix[j][i] != 0)
-                        {
-                            std::shared_ptr<Edge> edge = std::make_shared<Edge>(i, j, matrix[j][i], true, true);
-                            double coordX1 = x1 + (x2-x1)/2 - 50 * std::cos(std::atan((x2-x1)/(y2-y1)) + M_PI/2);
-                            double coordY1 = y1 + (y2-y1)/2 - (x2-x1)/(y2-y1) * (coordX1 - x1 - (x2-x1)/2);
-                            if(x2==x1)
+                            setEdge(edge, true, true);
+
+                            edge = std::make_shared<Edge>(i, j, matrix[j][i]);
+                            coordX1 = x1 + (x2-x1)/2 - 50 * std::sin(std::atan((x2-x1)/(y2-y1)) + M_PI/2);
+                            coordY1 = y1 + (y2-y1)/2 - (x2-x1)/(y2-y1) * (coordX1 - x1 - (x2-x1)/2);
+                            if(x2 == x1)
                             {
                                 coordX1 -= 20;
                             }
-                            edge->isDir = true;
-                            edge->dirTo = false;
+                            if(y2 == y1)
+                            {
+                                coordX1 = x1 + (x2-x1)/2;
+                                coordY1 = y1 + 50;
+                            }
 
                             calculateEdge(edge, QPoint(coordX1, coordY1));
-                            setEdge(edge);
+                            setEdge(edge, true, false);
+                        }
+                        else
+                        {
+                            if(matrix[i][j] != 0)
+                            {
+                                setEdge(std::make_shared<Edge>(i, j, matrix[i][j]), true, true);
+                            }
+                            else
+                            {
+                                setEdge(std::make_shared<Edge>(i, j, matrix[j][i]), true, false);
+                            }
                         }
                     }
                 }
@@ -443,6 +481,8 @@ public:
         }
         else if((Y >= yResLower && Y <= yResUpper) || (Y <= yResLower && Y >= yResUpper))
         {
+            qDebug() << "Зашло в изменение ребра в графе в нужное условие";
+
             if(Y >= yRes)
             {
                 edge->nad = false;

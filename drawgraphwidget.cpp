@@ -16,7 +16,7 @@ DrawGraphWidget::~DrawGraphWidget()
     delete ui;
 }
 
-void DrawGraphWidget::showVertexMenu(std::shared_ptr<Vertex> vert, QPoint pos)
+void DrawGraphWidget::showVertexMenu(std::shared_ptr<Vertex> vert/*, QPoint pos*/)
 {
     QMenu menu;
     QList<QAction*> actions;
@@ -31,15 +31,66 @@ void DrawGraphWidget::showVertexMenu(std::shared_ptr<Vertex> vert, QPoint pos)
         graphData->setLoopM(vert);
         this->update();
     });
+
+    QAction *editNameAction = new QAction("Изменить имя");
+    connect(editNameAction, &QAction::triggered, [=](){
+        bool ok;
+        QString name = QInputDialog::getText(this, tr("Изменение имени вершины"),
+                                           tr("Имя : "), QLineEdit::Normal, "", &ok);
+        if (ok && !name.isEmpty())
+        {
+            vert->name = name.toStdString();
+        }
+        this->update();
+    });
     actions.append(deleteAction);
     actions.append(loopAction);
+    actions.append(editNameAction);
 
-    menu.exec(actions, this->mapToGlobal(pos));
+    menu.exec(actions, this->mapToGlobal(QPoint(vert->coordX, vert->coordY)));
 }
 
-void DrawGraphWidget::showEdgeMenu(std::shared_ptr<Edge> edge, QPoint pos)
+void DrawGraphWidget::showEdgeMenu(std::shared_ptr<Edge> edge)
 {
+    QMenu menu;
+    QList<QAction*> actions;
 
+    QAction *deleteAction = new QAction("Удалить");
+    connect(deleteAction, &QAction::triggered, [=](){
+        //graphData->removeVertex(vert);
+        this->update();
+    });
+    QAction *isDirAction = new QAction("Направить/убрать направление");
+    connect(isDirAction, &QAction::triggered, [=](){
+        edge->isDir = !edge->isDir;
+        this->update();
+    });
+
+    QAction *dirToAction = new QAction("Перенаправить");
+    connect(dirToAction, &QAction::triggered, [=](){
+        edge->dirTo = !edge->dirTo;
+        this->update();
+    });
+
+    QAction *editWeightAction = new QAction("Изменить вес");
+    connect(editWeightAction, &QAction::triggered, [=](){
+        bool ok;
+        double d = QInputDialog::getDouble(this, tr("Изменение веса ребра"),
+                                           tr("Вес : "), edge->weight, -10000, 10000, 2, &ok);
+        if (ok)
+        {
+            edge->weight = d;
+        }
+
+        this->update();
+    });
+
+    actions.append(deleteAction);
+    actions.append(isDirAction);
+    actions.append(dirToAction);
+    actions.append(editWeightAction);
+
+    menu.exec(actions, this->mapToGlobal(QPoint(edge->mousePosition.rx(), edge->mousePosition.ry())));
 }
 
 void DrawGraphWidget::paintEvent(QPaintEvent *event)
@@ -57,7 +108,7 @@ void DrawGraphWidget::paintEvent(QPaintEvent *event)
 
         for (int i = 0; i < N; i++)
         {
-            for (int j = 0; j <= i; j++)
+            for (int j = i; j < N ; j++)
             {
                 std::vector<std::shared_ptr<Edge>> edgesCell =  matrix.at(i).at(j);
                 size_t numEdge = edgesCell.size();
@@ -76,6 +127,7 @@ void DrawGraphWidget::paintEvent(QPaintEvent *event)
 
                 for(int k = 0; k < numEdge; k++)
                 {
+                    painter->setPen(QPen(Qt::black, 1));
                     std::shared_ptr<Edge> closesEdge = edgesCell.at(k);
                     if(closesEdge->isNormal)
                     {
@@ -98,6 +150,7 @@ void DrawGraphWidget::paintEvent(QPaintEvent *event)
                     }
                     else
                     {
+
                         std::shared_ptr<Vertex> v1 = graphData->getVertex(closesEdge->v1Index);
                         std::shared_ptr<Vertex> v2 = graphData->getVertex(closesEdge->v2Index);
 
@@ -114,6 +167,30 @@ void DrawGraphWidget::paintEvent(QPaintEvent *event)
                         double width = closesEdge->heightWidth1.ry();
 
                         painter->translate(coordX + width / 2, coordY + height / 2);
+
+                        if(!closesEdge->dirTo && closesEdge->isDir)
+                        {
+                            if(v1->coordX < v2->coordX)
+                            {
+                                painter->setPen(QPen(Qt::green, 2));
+                            }
+                            else
+                            {
+                                painter->setPen(QPen(Qt::black, 1));
+                            }
+                        }
+                        else
+                        {
+                            if(v1->coordX < v2->coordX)
+                            {
+                                painter->setPen(QPen(Qt::black, 1));
+                            }
+                            else
+                            {
+                                painter->setPen(QPen(Qt::green, 2));
+                            }
+                        }
+
                         if(k < 0)
                         {
                             painter->rotate(180-closesEdge->angle);
@@ -122,6 +199,7 @@ void DrawGraphWidget::paintEvent(QPaintEvent *event)
                         {
                             painter->rotate(closesEdge->angle);
                         }
+
 
                         if(closesEdge->nad)
                         {
@@ -142,6 +220,30 @@ void DrawGraphWidget::paintEvent(QPaintEvent *event)
 
                         painter->translate(coordX + width / 2, coordY + height / 2);
 
+                        if(closesEdge->dirTo && closesEdge->isDir)
+                        {
+                            if(v1->coordX < v2->coordX)
+                            {
+                                painter->setPen(QPen(Qt::green, 2));
+                            }
+                            else
+                            {
+                                painter->setPen(QPen(Qt::black, 1));
+                            }
+                        }
+                        else
+                        {
+                            if(v1->coordX < v2->coordX)
+                            {
+                                painter->setPen(QPen(Qt::black, 1));
+                            }
+                            else
+                            {
+                                painter->setPen(QPen(Qt::green, 2));
+                            }
+                        }
+
+
                         if(k < 0)
                         {
                             painter->rotate(180-closesEdge->angle);
@@ -161,25 +263,12 @@ void DrawGraphWidget::paintEvent(QPaintEvent *event)
                         }
                         painter->resetTransform();
                         QRect rect = QRect(closesEdge->mousePosition.rx() - 15, closesEdge->mousePosition.ry() - 10, 30, 20);
+                        painter->setPen(QPen(Qt::black, 1));
                         painter->drawText(rect, QString::number(closesEdge->weight));
                     }
 
 
                 }
-
-                // Если веса одинаковые то ребро ненаправленное
-//                if (mirrorWeight > EPS && weight > EPS)
-//                {
-
-//                }
-//                else if (weight > EPS)
-//                {
-//                    painter->drawEllipse(v2Coords, 2.0, 2.0);
-//                }
-//                else if (mirrorWeight > EPS)
-//                {
-//                    painter->drawEllipse(v1Coords, 2.0, 2.0);
-//                }
             }
         }
 
@@ -223,19 +312,27 @@ void DrawGraphWidget::mousePressEvent(QMouseEvent *event)
 
     const int dist = 15;
 
-    bool needShowMenu = false;
-    if (event->buttons() & Qt::RightButton)
-    {
-        needShowMenu = true;
-    }
-    if(needEdge)
-    {
-        selectedEdge = graphData->getEdge(QPoint(X, Y));
-    }
-
+    std::shared_ptr<Edge> closestEdge = graphData->getEdge(QPoint(X, Y));
     std::shared_ptr<Vertex> closestVert = graphData->getVertex(X, Y, dist);
 
-    if (closestVert && !needShowMenu)
+    bool needShowVertexMenu = false;
+    bool needShowEdgeMenu = false;
+
+    if (event->buttons() & Qt::RightButton && closestVert)
+    {
+        needShowVertexMenu = true;
+    }
+
+    if (event->buttons() & Qt::RightButton && closestEdge)
+    {
+        needShowEdgeMenu = true;
+    }
+
+    if(event->buttons() & Qt::LeftButton && closestEdge && !needShowEdgeMenu && !needShowVertexMenu)
+    {
+        selectedEdge = closestEdge;
+    }
+    if (event->buttons() & Qt::LeftButton && closestVert && !needShowVertexMenu && !needShowEdgeMenu)
     {
         selectedVertex = closestVert;
         selectedVertex->color = Qt::red;
@@ -246,7 +343,7 @@ void DrawGraphWidget::mousePressEvent(QMouseEvent *event)
         }
         needRepaint = true;
     }
-    else if(!closestVert && !needShowMenu && !selectedEdge && !needEdge)
+    else if(event->buttons() & Qt::LeftButton && !closestVert && !needShowVertexMenu && !needShowEdgeMenu && !selectedEdge && !needEdge)
     {
         std::shared_ptr<Vertex> v = std::make_shared<Vertex>(X, Y, QString::number(rand() % 356).toStdString());
         graphData->addVertex(v);
@@ -254,15 +351,21 @@ void DrawGraphWidget::mousePressEvent(QMouseEvent *event)
         needRepaint = true;
     }
 
-    if (needShowMenu)
+    if (needShowVertexMenu)
     {
-        showVertexMenu(closestVert, event->pos());
+        showVertexMenu(closestVert/*, event->pos()*/);
+    }
+
+    if(needShowEdgeMenu)
+    {
+        showEdgeMenu(closestEdge);
     }
 
     if (needRepaint)
     {
         this->update();
     }
+    emit setMatrix();
 }
 
 void DrawGraphWidget::mouseMoveEvent(QMouseEvent *event)
@@ -300,10 +403,22 @@ void DrawGraphWidget::mouseMoveEvent(QMouseEvent *event)
             {
                 selectedVertex->coordX = X;
                 selectedVertex->coordY = Y;
-                for(std::vector<std::shared_ptr<Edge>> edgeVec : graphData->getEdges().at(selectedVertex->index))
+                for(int i = 0; i < getGraphData()->getEdges().at(selectedVertex->index).size(); i++)
                 {
-                    for(std::shared_ptr<Edge> edge : edgeVec)
+                    for(int j = 0; j < getGraphData()->getEdges().at(selectedVertex->index).at(i).size(); j++)
                     {
+                        std::shared_ptr<Edge> edge = getGraphData()->getEdges().at(selectedVertex->index).at(i).at(j);
+                        if(!edge->isNormal)
+                        {
+                            calculateEdgeMoveVertex(edge);
+                        }
+                    }
+                }
+                for(int i = 0; i < getGraphData()->getEdges().at(selectedVertex->index).size(); i++)
+                {
+                    for(int j = 0; j < getGraphData()->getEdges().at(i).at(selectedVertex->index).size(); j++)
+                    {
+                        std::shared_ptr<Edge> edge = getGraphData()->getEdges().at(i).at(selectedVertex->index).at(j);
                         if(!edge->isNormal)
                         {
                             calculateEdgeMoveVertex(edge);
@@ -343,7 +458,7 @@ void DrawGraphWidget::mouseReleaseEvent(QMouseEvent *event)
 
             std::shared_ptr<Vertex> closestVert = graphData->getVertex(X, Y, dist);
 
-            if(closestVert)
+            if(closestVert && closestVert != selectedVertex)
             {
                 graphData->setEdge(std::make_shared<Edge>(selectedVertex->index, closestVert->index, 1));
                 needRepaint = true;
@@ -399,7 +514,7 @@ void DrawGraphWidget::calculateEdgeMoveVertex(std::shared_ptr<Edge> edge)
 
         double k =(x2-x1)/(y2-y1);
 
-        if((!(y1<y2) && edge->upNorm) || (!(y1>y2) && !edge->upNorm))
+        if((!(y1 < y2) && edge->upNorm) || (!(y1 > y2) && !edge->upNorm))
         {
             d = -d;
         }
@@ -408,11 +523,11 @@ void DrawGraphWidget::calculateEdgeMoveVertex(std::shared_ptr<Edge> edge)
 
         X = x1 + (x2-x1) * edge->a1_a + coeff;
         Y = y1 + (y2-y1) * edge->a1_a - k*(coeff);
+        qDebug() << "Зашло в движение вершины изменение ребра в нужное условие";
 
         graphData->calculateEdge(edge, QPoint(X, Y), needEdge);
     }
 }
-
 std::shared_ptr<GraphData> DrawGraphWidget::getGraphData()
 {
     return graphData;
