@@ -22,7 +22,7 @@ struct Vertex
     std::string name= "";
     uint index = 0;
     QColor color = Qt::green;
-    double drawDiam = 20.0;
+    double drawDiam = 30.0;
 };
 
 struct Edge

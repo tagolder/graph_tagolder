@@ -8,14 +8,25 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
-    initGraph();
-
-    ui->edgeButtonTask->setStyleSheet("background-color: white");
-    ui->vertexButtonTask->setStyleSheet("background-color: grey");
-    ui->toolButton->setStyleSheet("background-color: white");
-    ui->tabWidget->removeTab(1);
+    ui->tabWidget->clear();
     ui->centralWidget->setLayout(ui->horizontalLayout_2);
+
+    ui->tabWidget->clear();
+
+    openReference();
+
+    connect(ui->actionSaveAsImage, &QAction::triggered, [=](){
+        saveAsImage();
+    });
+    connect(ui->actionOpen, &QAction::triggered, [=](){
+        openGraph();
+    });
+    connect(ui->actionHelp, &QAction::triggered, [=](){
+        openReference();
+    });
+
+    QWidget *w = new QWidget;
+    ui->tabWidget->addTab(w, "+");
 }
 
 MainWindow::~MainWindow()
@@ -23,51 +34,68 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::initGraph()
+void MainWindow::openReference()
 {
-    graph = std::make_shared<GraphData>();
+    QTextEdit * textEdit = new QTextEdit();
 
-    std::shared_ptr<Vertex> v1 = std::make_shared<Vertex>(100.0, 100.0, "name1");
-    std::shared_ptr<Vertex> v2 = std::make_shared<Vertex>(150.0, 200.0, "name2");
-    std::shared_ptr<Vertex> v3 = std::make_shared<Vertex>(200.0, 150.0, "name3");
-    std::shared_ptr<Vertex> v4 = std::make_shared<Vertex>(300.0, 150.0, "name4");
-    std::shared_ptr<Vertex> v5 = std::make_shared<Vertex>(350.0, 300.0, "name5");
-    graph->addVertex(v1);
-    graph->addVertex(v2);
-    graph->addVertex(v3);
-    graph->addVertex(v4);
-    graph->addVertex(v5);
+    textEdit->setReadOnly(true);
 
+    QFile file("/home/ya/graph_Tac/graph/reference.txt");
+    if (file.open(QIODevice::ReadOnly))
+    {
+       QString temp(file.readAll());
+       textEdit->append(temp);
+    }
+    ui->tabWidget->addTab(textEdit, "Reference");
 
-    graph->setEdge(std::make_shared<Edge>(0, 2, 3));
-    graph->setEdge(std::make_shared<Edge>(1, 2, 3));
-    graph->setEdge(std::make_shared<Edge>(2, 3, 3));
-    graph->setEdge(std::make_shared<Edge>(3, 4, 3));
+    QWidget *firstPageWidget = new QWidget;
+    QWidget *secondPageWidget = new QWidget;
+    QWidget *thirdPageWidget = new QWidget;
 
-    std::vector<std::vector<double>> matrix{
-        {0,5,0,0,0},
-        {6,1,0,0,0},
-        {0,0,0,0,3},
-        {0,0,0,1,0},
-        {0,0,3,0,0}
-      };
-    graph->setMatrixEdges(matrix);
-
-    ui->tab_1->setGraphData(graph);
-    ui->tabWidget->setTabsClosable(true);
-    connect(ui->tab_1, SIGNAL(setMatrix()), this, SLOT(setMatixOnTable()));
+    QStackedWidget *stackedWidget = new QStackedWidget(this);
+    stackedWidget->addWidget(firstPageWidget);
+    stackedWidget->addWidget(secondPageWidget);
+    stackedWidget->addWidget(thirdPageWidget);
 }
 
-
-//void MainWindow::on_spin_valueChanged(int arg1)
-//{
-//    model->setColumnCount(arg1);
-//    model->setRowCount(arg1);
-//}
-
-void MainWindow::on_openFileBut_clicked()
+void MainWindow::initGraph()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, "Выберите файл...", "/home/ya/Документы/graph", "*.tacmatr, *.taclist");
+//    graph = std::make_shared<GraphData>();
+
+//    std::shared_ptr<Vertex> v1 = std::make_shared<Vertex>(100.0, 100.0, "name1");
+//    std::shared_ptr<Vertex> v2 = std::make_shared<Vertex>(150.0, 200.0, "name2");
+//    std::shared_ptr<Vertex> v3 = std::make_shared<Vertex>(200.0, 150.0, "name3");
+//    std::shared_ptr<Vertex> v4 = std::make_shared<Vertex>(300.0, 150.0, "name4");
+//    std::shared_ptr<Vertex> v5 = std::make_shared<Vertex>(350.0, 300.0, "name5");
+//    graph->addVertex(v1);
+//    graph->addVertex(v2);
+//    graph->addVertex(v3);
+//    graph->addVertex(v4);
+//    graph->addVertex(v5);
+
+
+//    graph->setEdge(std::make_shared<Edge>(0, 2, 3));
+//    graph->setEdge(std::make_shared<Edge>(1, 2, 3));
+//    graph->setEdge(std::make_shared<Edge>(2, 3, 3));
+//    graph->setEdge(std::make_shared<Edge>(3, 4, 3));
+
+//    std::vector<std::vector<double>> matrix{
+//        {0,5,0,0,0},
+//        {6,1,0,0,0},
+//        {0,0,0,0,3},
+//        {0,0,0,1,0},
+//        {0,0,3,0,0}
+//      };
+//    graph->setMatrixEdges(matrix);
+
+//    ui->tab_1->setGraphData(graph);
+//    ui->tabWidget->setTabsClosable(true);
+//    connect(ui->tab_1, SIGNAL(setMatrix()), this, SLOT(setMatixOnTable()));
+}
+
+void MainWindow::openGraph()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, "Выберите файл...", "/home/ya/Документы/graphs", "*.tacmatr, *.taclist");
     QFile file(fileName);
     if (file.open(QIODevice::ReadOnly))
     {
@@ -89,21 +117,21 @@ void MainWindow::on_openFileBut_clicked()
         else
         {
             QList<QString> list;
-//          QDataStream in(&file);
             while(!file.atEnd())
             {
                 list.append(file.readLine());
             }
             parseMatrix(list);
         }
-        //ui->tabWidget->update();
-        //ui->wi->setFocus();
         file.close();
     }
 }
 
 void MainWindow::parseVertexFile(QString vertexS)
 {
+    DrawGraphWidget *w = (DrawGraphWidget *)ui->tabWidget->currentWidget();
+    std::shared_ptr<GraphData> graph = w->getGraphData();
+
     int i1 = vertexS.indexOf("{");
     int i2 = vertexS.indexOf("(");
     int i3 = vertexS.indexOf(",");
@@ -119,6 +147,8 @@ void MainWindow::parseVertexFile(QString vertexS)
 
 void MainWindow::parseEdgeFile(QString edgeS)
 {
+    DrawGraphWidget *w = (DrawGraphWidget *)ui->tabWidget->currentWidget();
+    std::shared_ptr<GraphData> graph = w->getGraphData();
     int i = edgeS.indexOf("(") + 1;
     QString s = edgeS.mid(i, edgeS.size() - i - 2);
     QList<QString> list = s.split(",");
@@ -138,62 +168,57 @@ void MainWindow::parseMatrix(QList<QString> list)
 
 void MainWindow::on_tabWidget_currentChanged(int index)
 {
-
-}
-
-void MainWindow::on_toolButton_clicked()
-{
-    DrawGraphWidget *w = (DrawGraphWidget *)ui->tabWidget->currentWidget();
-    w->needEdge = false;
-
-    std::shared_ptr<GraphData> g = std::make_shared<GraphData>();
-    DrawGraphWidget *widget = new DrawGraphWidget();
-    widget->setGraphData(g);
-    connect(widget, SIGNAL(setMatrix()), this, SLOT(setMatixOnTable()));
-//    connect(model, SIGNAL(itemChanged(QStandardItem*)))
-
-    ui->tabWidget->addTab(widget, QString::number(ui->tabWidget->count()));
-
-    ui->edgeButtonTask->setStyleSheet("background-color: white");
-    ui->vertexButtonTask->setStyleSheet("background-color: white");
-    ui->toolButton->setStyleSheet("background-color: grey");
-}
-
-void MainWindow::on_edgeButtonTask_clicked()
-{
-    DrawGraphWidget *w = (DrawGraphWidget *)ui->tabWidget->currentWidget();
-    w->needEdge = true;
-    ui->edgeButtonTask->setStyleSheet("background-color: grey");
-    ui->vertexButtonTask->setStyleSheet("background-color: white");
-    ui->toolButton->setStyleSheet("background-color: white");
-
-}
-
-void MainWindow::on_vertexButtonTask_clicked()
-{
-    DrawGraphWidget *w = (DrawGraphWidget *)ui->tabWidget->currentWidget();
-    w->needEdge = false;
-
-    ui->edgeButtonTask->setStyleSheet("background-color: white");
-    ui->vertexButtonTask->setStyleSheet("background-color: grey");
-    ui->toolButton->setStyleSheet("background-color: white");
-}
-
-void MainWindow::keyReleaseEvent(QKeyEvent *event)
-{
-    if(event->key() == Qt::Key_1)
+    if(index == ui->tabWidget->count()-1 && index > 0)
     {
-        on_edgeButtonTask_clicked();
+
+        bool ok;
+
+        QString tabname = QInputDialog::getText(this, tr("Ввод имени графа"),
+                                                tr("Имя : "), QLineEdit::Normal, "", &ok);
+
+        if (ok && !tabname.isEmpty())
+        {
+            ui->tabWidget->setCurrentIndex(0);
+
+            ui->tabWidget->removeTab(index);
+
+            DrawGraphWidget *widget = new DrawGraphWidget;
+            std::shared_ptr<GraphData> graph = std::make_shared<GraphData>();
+            widget->setGraphData(graph);
+            widget->needEdge = false;
+
+            connect(widget, SIGNAL(setMatrix()), this, SLOT(setMatixOnTable()));
+
+            ui->tabWidget->addTab(widget, tabname);
+
+            QWidget *w = new QWidget;
+            ui->tabWidget->addTab(w, "+");
+
+            ui->tabWidget->setCurrentIndex(index);
+        }
+
     }
-    if(event->key() == Qt::Key_3)
+    else if(index > 0 && index != ui->tabWidget->count()-1)
     {
-        on_vertexButtonTask_clicked();
-    }
-    if(event->key() == Qt::Key_2)
-    {
-        on_toolButton_clicked();
+        setMatixOnTable();
     }
 }
+
+//void MainWindow::on_toolButton_clicked()
+//{
+//    DrawGraphWidget *w = (DrawGraphWidget *)ui->tabWidget->currentWidget();
+//    w->needEdge = false;
+
+//    std::shared_ptr<GraphData> g = std::make_shared<GraphData>();
+//    DrawGraphWidget *widget = new DrawGraphWidget();
+//    widget->setGraphData(g);
+//    connect(widget, SIGNAL(setMatrix()), this, SLOT(setMatixOnTable()));
+
+//    ui->tabWidget->addTab(widget, QString::number(ui->tabWidget->count()));
+
+//    ui->edgeButtonTask->setStyleSheet("background-color: white");
+//    ui->vertexButtonTask->setStyleSheet("background-color: white");
+//}
 
 void MainWindow::setMatixOnTable()
 {
@@ -272,8 +297,12 @@ void MainWindow::on_table_cellChanged(int row, int column)
     }
 }
 
-void MainWindow::on_butAsImage_clicked()
-{
+void MainWindow::saveAsImage()
+{   
     DrawGraphWidget *w = (DrawGraphWidget *)ui->tabWidget->currentWidget();
-    w->grab().save("/home/ya/Изображения/graphs/" + ui->tabWidget->tabText(ui->tabWidget->currentIndex()) + ".png");
+    QString fileName = QFileDialog::getSaveFileName(this,
+                                                    "Save File",
+                                                    "/home/ya/Изображения/graphs",
+                                                    "Images *.png()");
+    w->grab().save(fileName + ".png");
 }

@@ -93,6 +93,28 @@ void DrawGraphWidget::showEdgeMenu(std::shared_ptr<Edge> edge)
     menu.exec(actions, this->mapToGlobal(QPoint(edge->mousePosition.rx(), edge->mousePosition.ry())));
 }
 
+void DrawGraphWidget::showWidgetMenu(QPoint pos)
+{
+    QMenu menu;
+    QList<QAction*> actions;
+
+    QAction *edgeAction = new QAction("Действия с ребрами");
+    connect(edgeAction, &QAction::triggered, [=](){
+        needEdge = true;
+        this->update();
+    });
+    QAction *vertexAction = new QAction("Действия с вершинами");
+    connect(vertexAction, &QAction::triggered, [=](){
+        needEdge = false;
+        this->update();
+    });
+
+    actions.append(edgeAction);
+    actions.append(vertexAction);
+
+    menu.exec(actions, this->mapToGlobal(pos));
+}
+
 void DrawGraphWidget::paintEvent(QPaintEvent *event)
 {
     QPainter *painter = new QPainter(this);
@@ -100,6 +122,15 @@ void DrawGraphWidget::paintEvent(QPaintEvent *event)
 
     if (graphData)
     {
+        QRect textRect = QRect(0,0,100,35);
+        if(needEdge)
+        {
+            painter->drawText(textRect, "Работа с ребрами");
+        }
+        else
+        {
+            painter->drawText(textRect, "Работа с вершинами");
+        }
         const std::vector<std::vector<std::vector<std::shared_ptr<Edge>>>> &matrix = graphData->getEdges();
         const double EPS = 1E-10;
 
@@ -317,22 +348,28 @@ void DrawGraphWidget::mousePressEvent(QMouseEvent *event)
 
     bool needShowVertexMenu = false;
     bool needShowEdgeMenu = false;
+    bool needShowWidgetMenu = false;
 
-    if (event->buttons() & Qt::RightButton && closestVert)
+    if (event->button() == Qt::RightButton && closestVert)
     {
         needShowVertexMenu = true;
     }
 
-    if (event->buttons() & Qt::RightButton && closestEdge)
+    if (event->button() == Qt::RightButton && closestEdge)
     {
         needShowEdgeMenu = true;
     }
 
-    if(event->buttons() & Qt::LeftButton && closestEdge && !needShowEdgeMenu && !needShowVertexMenu)
+    if(event->button() == Qt::RightButton && !closestEdge && !closestVert)
+    {
+        needShowWidgetMenu = true;
+    }
+
+    if(event->button() == Qt::LeftButton && closestEdge && !needShowEdgeMenu && !needShowVertexMenu)
     {
         selectedEdge = closestEdge;
     }
-    if (event->buttons() & Qt::LeftButton && closestVert && !needShowVertexMenu && !needShowEdgeMenu)
+    if (event->button() == Qt::LeftButton && closestVert && !needShowVertexMenu && !needShowEdgeMenu)
     {
         selectedVertex = closestVert;
         selectedVertex->color = Qt::red;
@@ -343,7 +380,7 @@ void DrawGraphWidget::mousePressEvent(QMouseEvent *event)
         }
         needRepaint = true;
     }
-    else if(event->buttons() & Qt::LeftButton && !closestVert && !needShowVertexMenu && !needShowEdgeMenu && !selectedEdge && !needEdge)
+    else if(event->button() == Qt::LeftButton && !closestVert && !needShowVertexMenu && !needShowEdgeMenu && !selectedEdge && !needEdge)
     {
         std::shared_ptr<Vertex> v = std::make_shared<Vertex>(X, Y, QString::number(rand() % 356).toStdString());
         graphData->addVertex(v);
@@ -359,6 +396,11 @@ void DrawGraphWidget::mousePressEvent(QMouseEvent *event)
     if(needShowEdgeMenu)
     {
         showEdgeMenu(closestEdge);
+    }
+
+    if(needShowWidgetMenu)
+    {
+        showWidgetMenu(event->pos());
     }
 
     if (needRepaint)

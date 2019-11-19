@@ -36,6 +36,7 @@ public:
 
     void showVertexMenu(std::shared_ptr<Vertex> vert);
     void showEdgeMenu(std::shared_ptr<Edge> edge);
+    void showWidgetMenu(QPoint pos);
     void calculateEdgeMoveVertex(std::shared_ptr<Edge> edge);
     std::shared_ptr<GraphData> getGraphData();
 //    void setMatixOnTable();
