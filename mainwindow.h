@@ -30,7 +30,6 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    void initGraph();
     void parseVertexFile(QString);
     void parseEdgeFile(QString);
     void parseMatrix(QList<QString>);

@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>tagolder_graphs</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../Изображения/graphs/yui.png</normaloff>../Изображения/graphs/yui.png</iconset>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QWidget" name="horizontalLayoutWidget">
     <property name="geometry">

@@ -25,6 +25,10 @@ MainWindow::MainWindow(QWidget *parent) :
         openReference();
     });
 
+    ui->actionExit->setShortcuts(QKeySequence::Quit);
+
+    connect(ui->actionExit, SIGNAL(triggered()), qApp, SLOT(closeAllWindows()));
+
     QWidget *w = new QWidget;
     ui->tabWidget->addTab(w, "+");
 }
@@ -56,41 +60,6 @@ void MainWindow::openReference()
     stackedWidget->addWidget(firstPageWidget);
     stackedWidget->addWidget(secondPageWidget);
     stackedWidget->addWidget(thirdPageWidget);
-}
-
-void MainWindow::initGraph()
-{
-//    graph = std::make_shared<GraphData>();
-
-//    std::shared_ptr<Vertex> v1 = std::make_shared<Vertex>(100.0, 100.0, "name1");
-//    std::shared_ptr<Vertex> v2 = std::make_shared<Vertex>(150.0, 200.0, "name2");
-//    std::shared_ptr<Vertex> v3 = std::make_shared<Vertex>(200.0, 150.0, "name3");
-//    std::shared_ptr<Vertex> v4 = std::make_shared<Vertex>(300.0, 150.0, "name4");
-//    std::shared_ptr<Vertex> v5 = std::make_shared<Vertex>(350.0, 300.0, "name5");
-//    graph->addVertex(v1);
-//    graph->addVertex(v2);
-//    graph->addVertex(v3);
-//    graph->addVertex(v4);
-//    graph->addVertex(v5);
-
-
-//    graph->setEdge(std::make_shared<Edge>(0, 2, 3));
-//    graph->setEdge(std::make_shared<Edge>(1, 2, 3));
-//    graph->setEdge(std::make_shared<Edge>(2, 3, 3));
-//    graph->setEdge(std::make_shared<Edge>(3, 4, 3));
-
-//    std::vector<std::vector<double>> matrix{
-//        {0,5,0,0,0},
-//        {6,1,0,0,0},
-//        {0,0,0,0,3},
-//        {0,0,0,1,0},
-//        {0,0,3,0,0}
-//      };
-//    graph->setMatrixEdges(matrix);
-
-//    ui->tab_1->setGraphData(graph);
-//    ui->tabWidget->setTabsClosable(true);
-//    connect(ui->tab_1, SIGNAL(setMatrix()), this, SLOT(setMatixOnTable()));
 }
 
 void MainWindow::openGraph()
@@ -203,22 +172,6 @@ void MainWindow::on_tabWidget_currentChanged(int index)
         setMatixOnTable();
     }
 }
-
-//void MainWindow::on_toolButton_clicked()
-//{
-//    DrawGraphWidget *w = (DrawGraphWidget *)ui->tabWidget->currentWidget();
-//    w->needEdge = false;
-
-//    std::shared_ptr<GraphData> g = std::make_shared<GraphData>();
-//    DrawGraphWidget *widget = new DrawGraphWidget();
-//    widget->setGraphData(g);
-//    connect(widget, SIGNAL(setMatrix()), this, SLOT(setMatixOnTable()));
-
-//    ui->tabWidget->addTab(widget, QString::number(ui->tabWidget->count()));
-
-//    ui->edgeButtonTask->setStyleSheet("background-color: white");
-//    ui->vertexButtonTask->setStyleSheet("background-color: white");
-//}
 
 void MainWindow::setMatixOnTable()
 {
