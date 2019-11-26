@@ -48,6 +48,8 @@ private slots:
     void on_tabWidget_currentChanged(int index);
     void setMatixOnTable();
     void on_table_cellChanged(int row, int column);
+    void on_reDoButton_clicked();
+    void on_upDoButton_clicked();
 };
 
 #endif // MAINWINDOW_H

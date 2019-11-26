@@ -24,11 +24,13 @@ void DrawGraphWidget::showVertexMenu(std::shared_ptr<Vertex> vert/*, QPoint pos*
     QAction *deleteAction = new QAction("Удалить");
     connect(deleteAction, &QAction::triggered, [=](){
         graphData->removeVertex(vert);
+        addGraphDataInVector();
         this->update();
     });
     QAction *loopAction = new QAction("Добавить петлю");
     connect(loopAction, &QAction::triggered, [=](){
         graphData->setLoopM(vert);
+        addGraphDataInVector();
         this->update();
     });
 
@@ -41,6 +43,7 @@ void DrawGraphWidget::showVertexMenu(std::shared_ptr<Vertex> vert/*, QPoint pos*
         {
             vert->name = name.toStdString();
         }
+        addGraphDataInVector();
         this->update();
     });
     actions.append(deleteAction);
@@ -57,18 +60,20 @@ void DrawGraphWidget::showEdgeMenu(std::shared_ptr<Edge> edge)
 
     QAction *deleteAction = new QAction("Удалить");
     connect(deleteAction, &QAction::triggered, [=](){
-        //graphData->removeVertex(vert);
+//        graphData->removeVertex(vert);
         this->update();
     });
     QAction *isDirAction = new QAction("Направить/убрать направление");
     connect(isDirAction, &QAction::triggered, [=](){
         edge->isDir = !edge->isDir;
+        addGraphDataInVector();
         this->update();
     });
 
     QAction *dirToAction = new QAction("Перенаправить");
     connect(dirToAction, &QAction::triggered, [=](){
         edge->dirTo = !edge->dirTo;
+        addGraphDataInVector();
         this->update();
     });
 
@@ -81,6 +86,8 @@ void DrawGraphWidget::showEdgeMenu(std::shared_ptr<Edge> edge)
         {
             edge->weight = d;
         }
+
+        addGraphDataInVector();
 
         this->update();
     });
@@ -101,11 +108,13 @@ void DrawGraphWidget::showWidgetMenu(QPoint pos)
     QAction *edgeAction = new QAction("Действия с ребрами");
     connect(edgeAction, &QAction::triggered, [=](){
         needEdge = true;
+        addGraphDataInVector();
         this->update();
     });
     QAction *vertexAction = new QAction("Действия с вершинами");
     connect(vertexAction, &QAction::triggered, [=](){
         needEdge = false;
+        addGraphDataInVector();
         this->update();
     });
 
@@ -331,7 +340,10 @@ void DrawGraphWidget::paintEvent(QPaintEvent *event)
         }
     }
     painter->end();
+
     delete painter;
+
+//    addGraphDataInVector();
 }
 
 void DrawGraphWidget::mousePressEvent(QMouseEvent *event)
@@ -384,6 +396,8 @@ void DrawGraphWidget::mousePressEvent(QMouseEvent *event)
     {
         std::shared_ptr<Vertex> v = std::make_shared<Vertex>(X, Y, QString::number(rand() % 356).toStdString());
         graphData->addVertex(v);
+
+        addGraphDataInVector();
 
         needRepaint = true;
     }
@@ -475,6 +489,7 @@ void DrawGraphWidget::mouseMoveEvent(QMouseEvent *event)
         {
             selectedEdge->mousePosition = QPoint(X, Y);
             graphData->calculateEdge(selectedEdge, QPoint(X, Y), needEdge);
+
             needRepaint = true;
         }
     }
@@ -503,10 +518,13 @@ void DrawGraphWidget::mouseReleaseEvent(QMouseEvent *event)
             if(closestVert && closestVert != selectedVertex)
             {
                 graphData->setEdge(std::make_shared<Edge>(selectedVertex->index, closestVert->index, 1));
+
                 needRepaint = true;
             }
 
             mouseCoord = QPoint(X, Y);
+
+            addGraphDataInVector();
         }
         if(newSelectedVertex)
         {
@@ -575,3 +593,50 @@ std::shared_ptr<GraphData> DrawGraphWidget::getGraphData()
     return graphData;
 }
 
+void DrawGraphWidget::unReDo(bool dirTo)
+{
+    if(dirTo)
+    {
+        qDebug() << graphDataIndex + 1 << graphDataVector.size() - 1;
+        if(graphDataIndex < graphDataVector.size() - 1)
+        {
+            graphDataIndex ++;
+            graphData = graphDataVector[graphDataIndex];
+            qDebug() << "++" << graphDataIndex;
+        }
+    }
+    else
+    {
+        if(graphDataIndex > 0)
+        {
+            graphDataIndex --;
+            graphData = graphDataVector[graphDataIndex];
+            qDebug() << "--" << graphDataIndex;
+        }
+    }
+    update();
+    emit setMatrix();
+}
+
+
+void DrawGraphWidget::addGraphDataInVector()
+{
+    if(graphDataIndex == 10)
+    {
+        graphDataVector.erase(graphDataVector.begin());
+        std::shared_ptr<GraphData> gDate = std::make_shared<GraphData>(*graphData);
+        graphDataVector.push_back(gDate);
+    }
+    else
+    {
+        graphDataVector.erase(graphDataVector.begin() + graphDataIndex, graphDataVector.end() - (graphDataVector.size() - graphDataIndex));
+        std::shared_ptr<GraphData> gDate = std::make_shared<GraphData>(*graphData);
+        graphDataVector.push_back(gDate);
+        graphDataIndex ++;
+    }
+}
+
+void DrawGraphWidget::setMatrixEdges(std::vector<std::vector<double> > &table)
+{
+    graphData->setMatrixEdges(table);
+}

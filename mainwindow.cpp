@@ -145,7 +145,7 @@ void MainWindow::on_tabWidget_currentChanged(int index)
         QString tabname = QInputDialog::getText(this, tr("Ввод имени графа"),
                                                 tr("Имя : "), QLineEdit::Normal, "", &ok);
 
-        if (ok && !tabname.isEmpty())
+        if (ok && !tabname.isEmpty() && tabname != "Reference")
         {
             ui->tabWidget->setCurrentIndex(0);
 
@@ -170,6 +170,16 @@ void MainWindow::on_tabWidget_currentChanged(int index)
     else if(index > 0 && index != ui->tabWidget->count()-1)
     {
         setMatixOnTable();
+    }
+    if(ui->tabWidget->tabBar()->tabText(index) == "Reference")
+    {
+        ui->reDoButton->setEnabled(false);
+        ui->upDoButton->setEnabled(false);
+    }
+    else
+    {
+        ui->reDoButton->setEnabled(true);
+        ui->upDoButton->setEnabled(true);
     }
 }
 
@@ -245,7 +255,7 @@ void MainWindow::on_table_cellChanged(int row, int column)
 
         DrawGraphWidget *w = (DrawGraphWidget *)ui->tabWidget->currentWidget();
 
-        w->getGraphData()->setMatrixEdges(matrixRes);
+        w->setMatrixEdges(matrixRes);
         w->update();
     }
 }
@@ -258,4 +268,22 @@ void MainWindow::saveAsImage()
                                                     "/home/ya/Изображения/graphs",
                                                     "Images *.png()");
     w->grab().save(fileName + ".png");
+}
+
+void MainWindow::on_reDoButton_clicked()
+{
+    DrawGraphWidget *w = (DrawGraphWidget *)ui->tabWidget->currentWidget();
+    if(w)
+    {
+        w->unReDo(false);
+    }
+}
+
+void MainWindow::on_upDoButton_clicked()
+{
+    DrawGraphWidget *w = (DrawGraphWidget *)ui->tabWidget->currentWidget();
+    if(w)
+    {
+        w->unReDo(true);
+    }
 }

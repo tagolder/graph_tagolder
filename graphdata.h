@@ -19,7 +19,7 @@ struct Vertex
 //        name = QString::number(X) + QString::number(Y);
     }
     double coordX = 0+.0, coordY = 0.0;
-    std::string name= "";
+    std::string name = "";
     uint index = 0;
     QColor color = Qt::green;
     double drawDiam = 30.0;
@@ -124,51 +124,6 @@ public:
 
 
         edges.at(i).at(j).push_back(edge);
-
-//        qDebug() << isDir << dirTo << edges.at(i).at(j).size();
-//            edges.at(j).at(i).push_back(edge);
-//        qDebug() << "weight:" << edge->weight << "   " <<  i << j;
-
-
-//        const std::vector<std::vector<std::vector<std::shared_ptr<Edge>>>> &matrix = getEdges();
-//        int size = matrix.size();
-//        std::vector<std::vector<double>> res;
-//        res.resize(size);
-//        for(int i = 0; i < size; i++)
-//        {
-//            res[i].resize(size);
-//        }
-//        for(int i = 0; i < size; i++)
-//        {
-
-//            for(int j = i; j < size; j++)
-//            {
-//                double summ_ij = 0;
-//                double summ_ji = 0;
-//                for(int k = 0; k < matrix.at(i).at(j).size(); k++)
-//                {
-//                    if(matrix.at(i).at(j).at(k)->isDir)
-//                    {
-//                        if(matrix.at(i).at(j).at(k)->dirTo)
-//                        {
-//                            summ_ij += matrix.at(i).at(j).at(k)->weight;
-//                        }
-//                        else
-//                        {
-//                            summ_ji += matrix.at(i).at(j).at(k)->weight;
-//                        }
-//                    }
-//                    else
-//                    {
-//                        summ_ij += matrix.at(i).at(j).at(k)->weight;
-//                        summ_ji += matrix.at(i).at(j).at(k)->weight;
-//                    }
-//                }
-//                res[i][j] = summ_ij;
-//                res[j][i] = summ_ji;
-//            }
-//            qDebug() << res[i];
-//        }
     }
 
     inline std::shared_ptr<Vertex> getVertex(const size_t index)
@@ -185,8 +140,6 @@ public:
         size_t index = indexOfVertex(vert);
 
         this->setEdge(calculateLoop(index, 1));
-
-//        edges[index][index].push_back();
     }
 
     inline void setLoop(std::shared_ptr<Vertex> vert, double weight)
@@ -542,6 +495,35 @@ public:
 
         }
     }
+
+//    void setEdges(std::vector<std::vector<std::vector<std::shared_ptr<Edge>>>> newEdges)
+//    {
+//        size_t N = newEdges.size();
+//        edges.resize(N);
+//        for(int i = 0; i < N; i++)
+//        {
+//            edges[i].resize(N);
+//            for(int j = i; j < N; j++)
+//            {
+//                for(int k = 0; k < newEdges[i][j].size(); k++)
+//                {
+//                    std::shared_ptr<Edge> edge = std::make_shared<Edge>(*newEdges[i][j][k]);
+//                    edges[i][j].push_back(edge);
+//                }
+//            }
+//        }
+//    }
+
+//    void setVertexes(std::vector<std::shared_ptr<Vertex>> newVertexes)
+//    {
+//        vertexes.resize(newVertexes.size());
+//        for(int i = 0; i < newVertexes.size(); i++)
+//        {
+//            std::shared_ptr<Vertex> vertex = std::make_shared<Vertex>(*newVertexes[i]);
+//            vertexes.push_back(vertex);
+//        }
+//    }
+
 
 
 

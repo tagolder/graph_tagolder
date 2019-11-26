@@ -1,8 +1,6 @@
 #ifndef DRAWGRAPHWIDGET_H
 #define DRAWGRAPHWIDGET_H
 
-//#define COEFFICIENT_EQUATION 0.23
-
 #include <QWidget>
 #include <QPainter>
 #include <QMouseEvent>
@@ -31,6 +29,7 @@ public:
     inline void setGraphData(std::shared_ptr<GraphData> gData)
     {
         graphData = gData;
+//        graphDataVector.push_back(gData);
         emit setMatrix();
     }
 
@@ -39,10 +38,10 @@ public:
     void showWidgetMenu(QPoint pos);
     void calculateEdgeMoveVertex(std::shared_ptr<Edge> edge);
     std::shared_ptr<GraphData> getGraphData();
-//    void setMatixOnTable();
-    void setModelTable(QStandardItemModel &model);
+    void setMatrixEdges(std::vector<std::vector<double>> &table);
+    void unReDo(bool dirTo);
+    void addGraphDataInVector();
     bool needEdge = false;
-//    void setMatrixTable(std::vector<std::vector<double>> &matrix);
 
 protected:
     void paintEvent(QPaintEvent *event);
@@ -54,6 +53,10 @@ private:
     Ui::DrawGraphWidget *ui;
 
     std::shared_ptr<GraphData> graphData;
+
+    unsigned int graphDataIndex = 0;
+
+    std::vector<std::shared_ptr<GraphData>> graphDataVector;
 
     std::shared_ptr<Vertex> selectedVertex;
 
